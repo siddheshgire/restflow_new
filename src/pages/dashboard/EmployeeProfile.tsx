@@ -199,6 +199,10 @@ export function EmployeeProfile() {
       setCurrentPassword("");
       setNewPassword("");
       setTimeout(async () => {
+        const { useNavigate } = await import("react-router-dom");
+        // We can't import hooks in setTimeout, wait, we can just do window.location.href = "/" here since it's a delay anyway.
+        // Actually, window.location.href = "/" is fine here because the user isn't pressing the back button to get here, it's a timed out auto-logout.
+        window.location.replace("/");
         await logout();
       }, 2000);
     } catch (err: any) {

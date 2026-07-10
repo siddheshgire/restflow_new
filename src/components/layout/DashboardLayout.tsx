@@ -21,13 +21,15 @@ export function DashboardLayout() {
     { name: "My Profile", icon: UserCircle, path: "/dashboard/profile", roles: ['owner', 'manager', 'waiter', 'cook'] },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Failed to log out", error);
-    }
+  const handleLogout = () => {
+    navigate('/', { replace: true });
+    setTimeout(async () => {
+      try {
+        await logout();
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    }, 100);
   };
 
   const navItems = allNavItems.filter(item => item.roles.includes(role || ''));

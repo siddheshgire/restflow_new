@@ -6,8 +6,8 @@
       "isPaid": true,
       "hasCompletedOnboarding": true,
       "passwordHash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791",
-      "createdAt": 1783266459742,
-      "currentSessionToken": "22l4s0sah8c1783686456228"
+      "createdAt": 1783708757869,
+      "currentSessionToken": "8mp7z170rlq1783710888060"
     },
     "user-rahul-cravecraft-app": {
       "email": "rahul@cravecraft.app",
@@ -18,7 +18,7 @@
       "passwordHash": "687f6da20de59091e67f594827cdee268125feb3aed1c3bad77d0f6761eb198a",
       "displayName": "rahul",
       "createdAt": 1783334500050,
-      "currentSessionToken": "y5dzijpokes1783667503713"
+      "currentSessionToken": "mho0pzcz5r1783707979989"
     },
     "user-rohan-cravecraft-app": {
       "email": "rohan@cravecraft.app",
@@ -34,8 +34,9 @@
       "email": "google.user@example.com",
       "role": "owner",
       "isPaid": true,
-      "hasCompletedOnboarding": false,
-      "createdAt": 1783335925043
+      "hasCompletedOnboarding": true,
+      "createdAt": 1783335925043,
+      "currentSessionToken": "vqylot3pzs1783709636246"
     },
     "user-aman-cravecraft-app": {
       "email": "aman@cravecraft.app",
@@ -69,6 +70,16 @@
       "displayName": "Cook Demo",
       "createdAt": 1783622865827,
       "currentSessionToken": "vqbs4lez36r1783662314585"
+    },
+    "user-siddheshgire45-gmail-com": {
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "isPaid": false,
+      "hasCompletedOnboarding": false,
+      "passwordHash": "08bf41636a8b68dc0c514fb11e44dd3f77476c19156a2337797deae16f1fc7f2",
+      "displayName": "siddheshgire45",
+      "createdAt": 1783710293447,
+      "currentSessionToken": "9isu28nz9ro1783710293471"
     }
   },
   "restaurants": {
@@ -76,6 +87,16 @@
       "name": "the spice garden",
       "ownerId": "mock-demo-owner-uid",
       "createdAt": 1783264656069
+    },
+    "3bdg3q1ravk": {
+      "name": "karnawati",
+      "ownerId": "mock-google-user-uid",
+      "createdAt": 1783709040231
+    },
+    "j3i42w8vs9i": {
+      "name": "siddhesh enterprises",
+      "ownerId": "user-siddheshgire45-gmail-com",
+      "createdAt": 1783709919750
     }
   },
   "outlets": {
@@ -86,6 +107,13 @@
       "createdAt": 1783264656081,
       "kitchenPin": "1234",
       "tableCount": 13
+    },
+    "vc9c3kuipf": {
+      "restaurantId": "3bdg3q1ravk",
+      "name": "karnawati food",
+      "location": "pune",
+      "tableCount": 12,
+      "createdAt": 1783709040557
     }
   },
   "menu_items": {
@@ -1867,6 +1895,33 @@
       "waiterName": "rahul",
       "guests": 2,
       "paymentMethod": "cash"
+    },
+    "ou0dewap9pc": {
+      "outletId": "s83vdell3or",
+      "tableId": "Takeaway",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "quantity": 1,
+          "price": 179,
+          "name": "Veg Spring Rolls"
+        },
+        {
+          "menuItemId": "menu-crispy-corn",
+          "quantity": 1,
+          "price": 189,
+          "name": "Crispy Corn"
+        }
+      ],
+      "status": "paid",
+      "total": 386.4,
+      "createdAt": 1783688817678,
+      "orderType": "takeaway",
+      "customerName": "siddharth",
+      "customerPhone": "8983500424",
+      "deliveryAddress": "",
+      "deliveryRider": "Unassigned",
+      "paymentMethod": "cash"
     }
   },
   "employees": {
@@ -1944,6 +1999,426 @@
       "quantity": 120,
       "unit": "kg",
       "threshold": 50
+    },
+    "7duxzfc79r": {
+      "outletId": "s83vdell3or",
+      "name": "Wheat Flour",
+      "quantity": 72,
+      "unit": "kg",
+      "threshold": 15
+    },
+    "6bl2lz8626h": {
+      "outletId": "s83vdell3or",
+      "name": "Refined Flour (Maida)",
+      "quantity": 34,
+      "unit": "kg",
+      "threshold": 8
+    },
+    "9h68rv66egm": {
+      "outletId": "s83vdell3or",
+      "name": "Cooking Oil",
+      "quantity": 55,
+      "unit": "litres",
+      "threshold": 12
+    },
+    "n1la72txwf": {
+      "outletId": "s83vdell3or",
+      "name": "Sunflower Oil",
+      "quantity": 22,
+      "unit": "litres",
+      "threshold": 5
+    },
+    "7sc558qnkj": {
+      "outletId": "s83vdell3or",
+      "name": "Butter",
+      "quantity": 18,
+      "unit": "kg",
+      "threshold": 4
+    },
+    "q9scbj8he6b": {
+      "outletId": "s83vdell3or",
+      "name": "Ghee",
+      "quantity": 26,
+      "unit": "kg",
+      "threshold": 6
+    },
+    "bz4u653sy7i": {
+      "outletId": "s83vdell3or",
+      "name": "Milk",
+      "quantity": 85,
+      "unit": "litres",
+      "threshold": 20
+    },
+    "zj31hm0cjw9": {
+      "outletId": "s83vdell3or",
+      "name": "Fresh Cream",
+      "quantity": 14,
+      "unit": "litres",
+      "threshold": 5
+    },
+    "pudk6jfxqwk": {
+      "outletId": "s83vdell3or",
+      "name": "Cheese",
+      "quantity": 21,
+      "unit": "kg",
+      "threshold": 6
+    },
+    "2dx6v6i7z8a": {
+      "outletId": "s83vdell3or",
+      "name": "Mozzarella Cheese",
+      "quantity": 17,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "d9s7zgs6bdu": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer",
+      "quantity": 32,
+      "unit": "kg",
+      "threshold": 8
+    },
+    "2edt56m7ayl": {
+      "outletId": "s83vdell3or",
+      "name": "Eggs",
+      "quantity": 420,
+      "unit": "units",
+      "threshold": 100
+    },
+    "wshm31pgp9e": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken",
+      "quantity": 64,
+      "unit": "kg",
+      "threshold": 15
+    },
+    "m0p3sbti8eo": {
+      "outletId": "s83vdell3or",
+      "name": "Mutton",
+      "quantity": 27,
+      "unit": "kg",
+      "threshold": 8
+    },
+    "td0w0fwetdi": {
+      "outletId": "s83vdell3or",
+      "name": "Fish Fillets",
+      "quantity": 19,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "cw6xqq3b237": {
+      "outletId": "s83vdell3or",
+      "name": "Prawns",
+      "quantity": 13,
+      "unit": "kg",
+      "threshold": 4
+    },
+    "zoo5byxqgv": {
+      "outletId": "s83vdell3or",
+      "name": "Potatoes",
+      "quantity": 95,
+      "unit": "kg",
+      "threshold": 20
+    },
+    "qdz1fcgphy": {
+      "outletId": "s83vdell3or",
+      "name": "Onions",
+      "quantity": 88,
+      "unit": "kg",
+      "threshold": 20
+    },
+    "llaecyqj0r": {
+      "outletId": "s83vdell3or",
+      "name": "Tomatoes",
+      "quantity": 63,
+      "unit": "kg",
+      "threshold": 15
+    },
+    "uo22mjm38o": {
+      "outletId": "s83vdell3or",
+      "name": "Capsicum",
+      "quantity": 26,
+      "unit": "kg",
+      "threshold": 6
+    },
+    "3f65wxb5kwy": {
+      "outletId": "s83vdell3or",
+      "name": "Carrots",
+      "quantity": 22,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "u7lfzh9pon9": {
+      "outletId": "s83vdell3or",
+      "name": "Cabbage",
+      "quantity": 19,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "0nlz9q3uejx": {
+      "outletId": "s83vdell3or",
+      "name": "Cauliflower",
+      "quantity": 17,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "7gmamnkir6m": {
+      "outletId": "s83vdell3or",
+      "name": "Green Peas",
+      "quantity": 15,
+      "unit": "kg",
+      "threshold": 4
+    },
+    "b68zh8g23zi": {
+      "outletId": "s83vdell3or",
+      "name": "Sweet Corn",
+      "quantity": 20,
+      "unit": "kg",
+      "threshold": 5
+    },
+    "wjrkbqbyvua": {
+      "outletId": "s83vdell3or",
+      "name": "Mushrooms",
+      "quantity": 12,
+      "unit": "kg",
+      "threshold": 3
+    },
+    "l90dvxszqve": {
+      "outletId": "s83vdell3or",
+      "name": "Spinach",
+      "quantity": 14,
+      "unit": "kg",
+      "threshold": 4
+    },
+    "w7h7yj23s9": {
+      "outletId": "s83vdell3or",
+      "name": "Garlic",
+      "quantity": 16,
+      "unit": "kg",
+      "threshold": 4
+    },
+    "g0tpd4ntmq4": {
+      "outletId": "s83vdell3or",
+      "name": "Ginger",
+      "quantity": 11,
+      "unit": "kg",
+      "threshold": 3
+    },
+    "zkng8um8z0s": {
+      "outletId": "s83vdell3or",
+      "name": "Green Chillies",
+      "quantity": 8,
+      "unit": "kg",
+      "threshold": 2
+    },
+    "if0ik4v7vm8": {
+      "outletId": "s83vdell3or",
+      "name": "Coriander Leaves",
+      "quantity": 6,
+      "unit": "kg",
+      "threshold": 2
+    },
+    "h2kxcuaowk7": {
+      "outletId": "s83vdell3or",
+      "name": "Mint Leaves",
+      "quantity": 5,
+      "unit": "kg",
+      "threshold": 1
+    },
+    "aeg02pwf19e": {
+      "outletId": "s83vdell3or",
+      "name": "Lemons",
+      "quantity": 180,
+      "unit": "units",
+      "threshold": 40
+    },
+    "zmluzfioej": {
+      "outletId": "s83vdell3or",
+      "name": "Curd",
+      "quantity": 24,
+      "unit": "kg",
+      "threshold": 6
+    },
+    "5kyqvde2tx3": {
+      "outletId": "s83vdell3or",
+      "name": "Sugar",
+      "quantity": 58,
+      "unit": "kg",
+      "threshold": 12
+    },
+    "i60m2eulifo": {
+      "outletId": "s83vdell3or",
+      "name": "Salt",
+      "quantity": 44,
+      "unit": "kg",
+      "threshold": 10
+    },
+    "ws8kulocui": {
+      "outletId": "s83vdell3or",
+      "name": "Black Pepper",
+      "quantity": 4200,
+      "unit": "gm",
+      "threshold": 800
+    },
+    "bnhv8hdpfi7": {
+      "outletId": "s83vdell3or",
+      "name": "Red Chilli Powder",
+      "quantity": 7500,
+      "unit": "gm",
+      "threshold": 1500
+    },
+    "rwjva32zhlg": {
+      "outletId": "s83vdell3or",
+      "name": "Turmeric Powder",
+      "quantity": 4300,
+      "unit": "gm",
+      "threshold": 1000
+    },
+    "pashrdmrzma": {
+      "outletId": "s83vdell3or",
+      "name": "Garam Masala",
+      "quantity": 2800,
+      "unit": "gm",
+      "threshold": 600
+    },
+    "pqyibakih7": {
+      "outletId": "s83vdell3or",
+      "name": "Cumin Seeds",
+      "quantity": 3600,
+      "unit": "gm",
+      "threshold": 700
+    },
+    "19u1lwsg55p": {
+      "outletId": "s83vdell3or",
+      "name": "Coriander Powder",
+      "quantity": 5100,
+      "unit": "gm",
+      "threshold": 1200
+    },
+    "2z5nro194ey": {
+      "outletId": "s83vdell3or",
+      "name": "Oregano",
+      "quantity": 900,
+      "unit": "gm",
+      "threshold": 200
+    },
+    "j6echoavold": {
+      "outletId": "s83vdell3or",
+      "name": "Chilli Flakes",
+      "quantity": 1100,
+      "unit": "gm",
+      "threshold": 250
+    },
+    "3furcfy27nk": {
+      "outletId": "s83vdell3or",
+      "name": "Soy Sauce",
+      "quantity": 9,
+      "unit": "litres",
+      "threshold": 2
+    },
+    "d9xgd3vge9m": {
+      "outletId": "s83vdell3or",
+      "name": "Tomato Ketchup",
+      "quantity": 16,
+      "unit": "litres",
+      "threshold": 4
+    },
+    "ldhaqh8bjyk": {
+      "outletId": "s83vdell3or",
+      "name": "Vinegar",
+      "quantity": 11,
+      "unit": "litres",
+      "threshold": 3
+    },
+    "iky2vn9olcj": {
+      "outletId": "s83vdell3or",
+      "name": "Mayonnaise",
+      "quantity": 14,
+      "unit": "kg",
+      "threshold": 3
+    },
+    "0puczrx6k3x": {
+      "outletId": "s83vdell3or",
+      "name": "Pizza Sauce",
+      "quantity": 10,
+      "unit": "litres",
+      "threshold": 3
+    },
+    "6rgb00mumk9": {
+      "outletId": "s83vdell3or",
+      "name": "Burger Buns",
+      "quantity": 165,
+      "unit": "units",
+      "threshold": 40
+    },
+    "tcz0sbkgmp": {
+      "outletId": "s83vdell3or",
+      "name": "Pizza Bases",
+      "quantity": 82,
+      "unit": "units",
+      "threshold": 20
+    },
+    "8m1t6kqbsw8": {
+      "outletId": "s83vdell3or",
+      "name": "Noodles",
+      "quantity": 31,
+      "unit": "kg",
+      "threshold": 8
+    },
+    "ys4hoqihq6m": {
+      "outletId": "s83vdell3or",
+      "name": "Pasta",
+      "quantity": 27,
+      "unit": "kg",
+      "threshold": 6
+    },
+    "iuzzrtvlscn": {
+      "outletId": "s83vdell3or",
+      "name": "Coca-Cola Bottles",
+      "quantity": 120,
+      "unit": "units",
+      "threshold": 30
+    },
+    "nfon8x7bfk": {
+      "outletId": "s83vdell3or",
+      "name": "Pepsi Bottles",
+      "quantity": 96,
+      "unit": "units",
+      "threshold": 25
+    },
+    "sv9wykbt3": {
+      "outletId": "s83vdell3or",
+      "name": "Sprite Bottles",
+      "quantity": 74,
+      "unit": "units",
+      "threshold": 20
+    },
+    "dw2jrw83md9": {
+      "outletId": "s83vdell3or",
+      "name": "Mineral Water Bottles",
+      "quantity": 210,
+      "unit": "units",
+      "threshold": 50
+    },
+    "sx52capl7k": {
+      "outletId": "s83vdell3or",
+      "name": "Vanilla Ice Cream",
+      "quantity": 16,
+      "unit": "litres",
+      "threshold": 4
+    },
+    "zturhb3vtf": {
+      "outletId": "s83vdell3or",
+      "name": "Chocolate Syrup",
+      "quantity": 7,
+      "unit": "litres",
+      "threshold": 2
+    },
+    "eyffb0g6tqn": {
+      "outletId": "s83vdell3or",
+      "name": "Oreo Biscuits",
+      "quantity": 58,
+      "unit": "packets",
+      "threshold": 15
     }
   },
   "audit_logs": {
@@ -2578,6 +3053,172 @@
       "outletId": "",
       "message": "demo.owner signed in via Email.",
       "createdAt": 1783686456218
+    },
+    "952rlcezgge": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783693252467
+    },
+    "9i6fwtogdyh": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783693256204
+    },
+    "qmetrdvj24c": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783707033228
+    },
+    "7car02nb2gl": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783707979980
+    },
+    "1gpdjj8kx44": {
+      "action": "Edit Employee Details",
+      "details": "Updated details/role for employee rahul (Role: manager, Salary: ₹20000)",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783707988285,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "9ew1v2gu80h": {
+      "action": "Edit Employee Details",
+      "details": "Updated details/role for employee rahul (Role: waiter, Salary: ₹20000)",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783708004280,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "qmi88br6l2": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783708918664
+    },
+    "tpgia0myghf": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783709115239
+    },
+    "lo2fyrmdink": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783709650837
+    },
+    "o9oy2xdtqii": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "New Owner siddhesh gire registered and signed in.",
+      "createdAt": 1783709879800
+    },
+    "lu7yz7grzhq": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "siddhesh gire signed in via Email.",
+      "createdAt": 1783709899259
+    },
+    "pcho2mktwj": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "siddhesh gire signed in via Email.",
+      "createdAt": 1783710151222
+    },
+    "a9g0xkap5cr": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "siddhesh gire signed in via Email.",
+      "createdAt": 1783710170109
+    },
+    "1y6drnyup36": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "siddhesh gire signed in via Email.",
+      "createdAt": 1783710206515
+    },
+    "rj5u45cl2r": {
+      "type": "login_success",
+      "email": "siddheshgire45@gmail.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "New Owner siddheshgire45 registered and signed in.",
+      "createdAt": 1783710293463
+    },
+    "wo4merlltb": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710451243
+    },
+    "90215zw1f5u": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710539152
+    },
+    "tl5zoglzv4": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710607317
+    },
+    "36qpfb0j4am": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710770179
+    },
+    "zhyp2vyknu": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710811088
+    },
+    "lqj44vm1aog": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783710888052
     }
   },
   "attendance": {
@@ -2616,6 +3257,24 @@
       "clockIn": 1783667533363,
       "clockOut": 1783667668344,
       "date": "2026-07-10"
+    },
+    "v9cdgq9dw9o": {
+      "employeeId": "user-rahul-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "role": "waiter",
+      "clockIn": 1783708088795,
+      "clockOut": 1783708322679,
+      "date": "2026-07-10"
+    },
+    "nbatoa60ksr": {
+      "employeeId": "user-rahul-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "role": "waiter",
+      "clockIn": 1783708585334,
+      "clockOut": 1783708604667,
+      "date": "2026-07-11"
     }
   }
 }

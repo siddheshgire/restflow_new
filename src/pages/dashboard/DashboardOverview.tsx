@@ -229,7 +229,7 @@ export function DashboardOverview() {
     if (role === 'owner') {
       const q = query(
         collection(db, "audit_logs"),
-        where("outletId", "in", [selectedOutletId, ""])
+        where("outletId", "==", selectedOutletId)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {

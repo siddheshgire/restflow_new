@@ -6,9 +6,11 @@ export function Navbar() {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
+  const handleLogout = () => {
+    navigate("/", { replace: true });
+    setTimeout(async () => {
+      await logout();
+    }, 100);
   };
 
   return (

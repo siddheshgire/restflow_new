@@ -23,6 +23,7 @@ export function TableServiceConsole() {
       await addDoc(collection(db, "audit_logs"), {
         action,
         details,
+        outletId: selectedOutletId,
         ownerId: user?.uid || "UnknownOwner",
         timestamp: Date.now(),
         performedBy: user?.email || "Unknown User"
@@ -39,6 +40,7 @@ export function TableServiceConsole() {
     return new Map<string, any>(menuItems.map(item => [item.id, item]));
   }, [menuItems]);
   const [isCustomOrderOpen, setIsCustomOrderOpen] = useState(false);
+  const [activeWaiters, setActiveWaiters] = useState<Set<string>>(new Set());
   const [customOrderType, setCustomOrderType] = useState<'takeaway' | 'delivery'>('takeaway');
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
@@ -155,10 +157,26 @@ export function TableServiceConsole() {
       setMenuItems(fetched);
     });
 
+    // Subscribe to active attendances to know who is clocked in
+    const attendanceQuery = query(
+      collection(db, "attendance"),
+      where("outletId", "==", selectedOutletId),
+      where("clockOut", "==", null)
+    );
+
+    const unsubscribeAttendance = onSnapshot(attendanceQuery, (snapshot) => {
+      const activeNames = new Set<string>();
+      snapshot.docs.forEach(doc => {
+        activeNames.add(doc.data().name);
+      });
+      setActiveWaiters(activeNames);
+    });
+
     return () => {
       unsubscribeOrders();
       unsubscribeStaff();
       unsubscribeMenu();
+      unsubscribeAttendance();
     };
   }, [selectedOutletId]);
 
@@ -994,22 +1012,30 @@ export function TableServiceConsole() {
                 {staff.length === 0 ? (
                   <div className="text-sm text-zinc-500 italic p-3 bg-zinc-50 rounded-lg border border-zinc-100">No active waiter staff available.</div>
                 ) : (
-                  <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar p-1">
-                    {staff.map((emp) => (
+                  <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                    {staff.map((emp) => {
+                      const isActive = activeWaiters.has(emp.name);
+                      return (
                       <button
                         key={emp.id}
                         type="button"
-                        onClick={() => setSelectedWaiter(emp.name)}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                        onClick={() => isActive && setSelectedWaiter(emp.name)}
+                        disabled={!isActive}
+                        title={!isActive ? "This waiter has not clocked in yet" : "Assign to this waiter"}
+                        className={`relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-300 ${
+                          !isActive ? 'opacity-40 cursor-not-allowed bg-zinc-50 border-zinc-200 text-zinc-400 grayscale' :
                           selectedWaiter === emp.name
-                            ? 'bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-600/20 scale-105'
-                            : 'bg-white border-zinc-200 text-zinc-600 hover:border-orange-300 hover:bg-orange-50'
+                            ? 'bg-orange-600 border-orange-600 text-white shadow-[0_4px_15px_rgba(234,88,12,0.3)] scale-105 cursor-pointer z-10'
+                            : 'bg-white border-zinc-200 text-zinc-700 hover:border-orange-300 hover:bg-orange-50 hover:shadow-sm cursor-pointer'
                         }`}
                       >
-                        <User className={`w-4 h-4 ${selectedWaiter === emp.name ? 'text-orange-200' : 'text-zinc-400'}`} />
+                        {/* Status Indicator */}
+                        <div className={`w-2.5 h-2.5 rounded-full absolute -top-1 -right-1 border-2 border-white ${isActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-red-500'}`} />
+                        
+                        <User className={`w-4 h-4 ${!isActive ? 'text-zinc-300' : selectedWaiter === emp.name ? 'text-orange-200' : 'text-zinc-400'}`} />
                         {emp.name}
                       </button>
-                    ))}
+                    )})}
                   </div>
                 )}
               </div>

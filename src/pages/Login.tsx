@@ -31,12 +31,18 @@ export function Login() {
       const user = await signInWithEmail(email, password, isSignUp ? fullName : undefined);
       setSuccess(true);
       
-      // Fetch user role from db to determine redirection
       const uid = user!.uid;
-      const usersRes = await fetch("/api/db/users");
-      const users = await usersRes.json();
-      const userDoc = users[uid];
-      const role = userDoc?.role || "owner";
+      const { doc, getDoc } = await import("firebase/firestore");
+      const { db } = await import("../lib/firebase");
+      
+      const userDocSnap = await getDoc(doc(db, "users", uid));
+      let role = "owner";
+      let userData: any = null;
+
+      if (userDocSnap.exists()) {
+        userData = userDocSnap.data();
+        role = userData.role || "owner";
+      }
 
       setTimeout(() => {
         if (role === "waiter") {
@@ -47,8 +53,8 @@ export function Login() {
           navigate("/dashboard");
         } else {
           // Owner
-          if (userDoc?.isPaid) {
-            if (userDoc?.hasCompletedOnboarding) {
+          if (userData?.isPaid) {
+            if (userData?.hasCompletedOnboarding) {
               navigate("/dashboard");
             } else {
               navigate("/onboarding");

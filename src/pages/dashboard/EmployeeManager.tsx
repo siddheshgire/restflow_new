@@ -26,6 +26,7 @@ export function EmployeeManager() {
       await addDoc(collection(db, "audit_logs"), {
         action,
         details,
+        outletId: selectedOutletId,
         ownerId: user?.uid || "UnknownOwner",
         timestamp: Date.now(),
         performedBy: user?.email || "Unknown User"
