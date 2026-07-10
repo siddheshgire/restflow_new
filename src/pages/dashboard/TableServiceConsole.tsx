@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, useMemo } from "react";
 import { collection, onSnapshot, query, where, updateDoc, doc, addDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { Order } from "../../types";
@@ -35,6 +35,9 @@ export function TableServiceConsole() {
   // New Delivery / Takeaway states
   const [activeTab, setActiveTab] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
   const [menuItems, setMenuItems] = useState<any[]>([]);
+  const menuMap = useMemo(() => {
+    return new Map<string, any>(menuItems.map(item => [item.id, item]));
+  }, [menuItems]);
   const [isCustomOrderOpen, setIsCustomOrderOpen] = useState(false);
   const [customOrderType, setCustomOrderType] = useState<'takeaway' | 'delivery'>('takeaway');
   const [custName, setCustName] = useState("");
@@ -163,7 +166,7 @@ export function TableServiceConsole() {
     const selectedItems = Object.entries(customQuantities)
       .filter(([_, qty]) => qty > 0)
       .map(([itemId, qty]) => {
-        const item = menuItems.find(m => m.id === itemId);
+        const item = menuMap.get(itemId);
         return {
           menuItemId: itemId,
           quantity: qty,
@@ -882,7 +885,7 @@ export function TableServiceConsole() {
               {/* Total Summary Breakdown */}
               {(() => {
                 const subtotal = Object.entries(customQuantities).reduce((sum, [itemId, qty]) => {
-                  const item = menuItems.find(m => m.id === itemId);
+                  const item = menuMap.get(itemId);
                   return sum + (item?.price || 0) * qty;
                 }, 0);
                 const tax = subtotal * 0.05;
