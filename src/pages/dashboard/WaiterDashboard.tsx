@@ -297,10 +297,6 @@ export function WaiterDashboard() {
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen bg-zinc-50 flex items-center justify-center text-zinc-400">Loading Dashboard...</div>;
-  }
-
   // Filter active orders based on role, type, and staff assignment
   const activeOrders = orders.filter(o => {
     // Owners and managers can view all active orders

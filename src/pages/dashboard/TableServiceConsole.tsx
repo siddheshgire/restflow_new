@@ -372,9 +372,7 @@ export function TableServiceConsole() {
     setIsModalOpen(true);
   };
 
-  if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-zinc-500">Loading Table Service Console...</div>;
-  }
+  // loading check removed to prevent UI stutter
 
   // Define dynamic tables list based on active outlet configuration
   const totalTablesList = Array.from({ length: tableCount }).map((_, idx) => String(idx + 1));

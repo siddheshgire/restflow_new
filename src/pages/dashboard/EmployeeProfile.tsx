@@ -291,9 +291,7 @@ export function EmployeeProfile() {
     loadProfile();
   }, [user, role, outlets]);
 
-  if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-zinc-500">Loading Profile...</div>;
-  }
+  // loading check removed to prevent UI stutter
 
   if (!profileData) {
     return <div className="text-center py-12 text-zinc-500">No profile found.</div>;

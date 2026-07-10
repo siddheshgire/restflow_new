@@ -13,6 +13,7 @@ export function MenuManager() {
   // Form state
   const [isAdding, setIsAdding] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", description: "", price: "", category: "Mains" });
+  const [errors, setErrors] = useState<{name?: string; price?: string; general?: string}>({});
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
@@ -41,17 +42,31 @@ export function MenuManager() {
 
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newItem.name || !newItem.price || !selectedOutletId) return;
+    
+    // Progressive validation (one field at a time)
+    if (!newItem.name.trim()) {
+      setErrors({ name: "Name is required" });
+      return;
+    }
+    if (!newItem.price) {
+      setErrors({ price: "Price is required" });
+      return;
+    }
+    
+    // Clear previous errors if all valid
+    setErrors({});
+
+    if (!selectedOutletId) return;
     
     const priceVal = parseFloat(newItem.price);
     if (isNaN(priceVal) || priceVal <= 0) {
-      alert("Please enter a valid price greater than 0.");
+      setErrors({ general: "Please enter a valid price greater than 0." });
       return;
     }
 
     await addDoc(collection(db, "menu_items"), {
       outletId: selectedOutletId,
-      name: newItem.name,
+      name: newItem.name.trim(),
       description: newItem.description,
       price: priceVal,
       category: newItem.category,
@@ -60,6 +75,7 @@ export function MenuManager() {
     });
     setIsAdding(false);
     setNewItem({ name: "", description: "", price: "", category: "Mains" });
+    setErrors({});
   };
 
   const handleDelete = async (id: string) => {
@@ -123,16 +139,19 @@ export function MenuManager() {
       </div>
 
       {isAdding && (
-        <form onSubmit={handleAdd} className="mb-8 p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
+        <form noValidate onSubmit={handleAdd} className="mb-8 p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
            <h3 className="text-lg font-semibold mb-4 text-zinc-900">Add New Menu Item</h3>
+           {errors.general && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{errors.general}</div>}
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Name</label>
-                <input required type="text" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input type="text" value={newItem.name} onChange={e => { setNewItem({...newItem, name: e.target.value}); setErrors({...errors, name: undefined}); }} className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.name ? 'border-red-500 bg-red-50' : 'border-zinc-300'}`} />
+                {errors.name && <span className="text-xs text-red-500 mt-1 block">{errors.name}</span>}
              </div>
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Price (₹)</label>
-                <input required type="number" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input type="number" step="any" value={newItem.price} onChange={e => { setNewItem({...newItem, price: e.target.value}); setErrors({...errors, price: undefined}); }} className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.price ? 'border-red-500 bg-red-50' : 'border-zinc-300'}`} />
+                {errors.price && <span className="text-xs text-red-500 mt-1 block">{errors.price}</span>}
              </div>
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Category</label>
@@ -175,7 +194,7 @@ export function MenuManager() {
              </div>
            </div>
            <div className="flex justify-end gap-2">
-             <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors">Cancel</button>
+             <button type="button" onClick={() => { setIsAdding(false); setErrors({}); }} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors">Cancel</button>
              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-md transition-colors">Save Item</button>
            </div>
         </form>

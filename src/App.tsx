@@ -19,8 +19,10 @@ const KitchenDisplay = lazy(() => import("./pages/KitchenDisplay").then(m => ({ 
 const QrMenu = lazy(() => import("./pages/QrMenu").then(m => ({ default: m.QrMenu })));
 const AttendanceManager = lazy(() => import("./pages/dashboard/AttendanceManager").then(m => ({ default: m.AttendanceManager })));
 
-function ProtectedRoute({ children, requireRole, skipOnboardingCheck = false }: { children: ReactNode, requireRole?: string[], skipOnboardingCheck?: boolean }) {
-  const { user, loading, role, hasCompletedOnboarding, isPaid } = useAuth();
+const BranchSelector = lazy(() => import("./pages/BranchSelector").then(m => ({ default: m.BranchSelector })));
+
+function ProtectedRoute({ children, requireRole, skipOnboardingCheck = false, skipBranchCheck = false }: { children: ReactNode, requireRole?: string[], skipOnboardingCheck?: boolean, skipBranchCheck?: boolean }) {
+  const { user, loading, role, hasCompletedOnboarding, isPaid, selectedOutletId, outlets } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
@@ -30,6 +32,10 @@ function ProtectedRoute({ children, requireRole, skipOnboardingCheck = false }: 
     }
     if (!skipOnboardingCheck && !hasCompletedOnboarding) {
       return <Navigate to="/onboarding" replace />;
+    }
+    // If onboarding is complete, but no branch is selected, force selection
+    if (!skipBranchCheck && hasCompletedOnboarding && !selectedOutletId && outlets.length > 0) {
+      return <Navigate to="/select-branch" replace />;
     }
   }
 
@@ -57,6 +63,7 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute skipOnboardingCheck requireRole={['owner']}><Onboarding /></ProtectedRoute>} />
+            <Route path="/select-branch" element={<ProtectedRoute skipBranchCheck requireRole={['owner']}><BranchSelector /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<ProtectedRoute requireRole={['owner', 'manager']}><DashboardOverview /></ProtectedRoute>} />
               <Route path="service" element={<ProtectedRoute requireRole={['owner', 'manager']}><TableServiceConsole /></ProtectedRoute>} />

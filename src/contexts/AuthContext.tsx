@@ -85,8 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (storedOutletId && isValidStored) {
               setSelectedOutletIdState(storedOutletId);
             } else {
-              setSelectedOutletIdState(fetchedOutlets[0].id);
-              localStorage.setItem("selectedOutletId", fetchedOutlets[0].id);
+              setSelectedOutletIdState(""); // Leave empty to force selection screen
             }
           } else {
             setSelectedOutletIdState("");
@@ -314,6 +313,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     localStorage.removeItem("active_session_token");
+    localStorage.removeItem("selectedOutletId");
     await signOut(auth);
   };
 

@@ -19,6 +19,9 @@ export function InventoryManager() {
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", quantity: "", unit: "kg", threshold: "" });
+  const [errors, setErrors] = useState<{name?: string; quantity?: string; threshold?: string; general?: string}>({});
+  const [isAddUnitOpen, setIsAddUnitOpen] = useState(false);
+  const unitOptions = ["kg", "liters", "units", "gms"];
 
   useEffect(() => {
     if (!selectedOutletId) {
@@ -46,25 +49,44 @@ export function InventoryManager() {
 
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newItem.name || !newItem.quantity || !newItem.threshold || !selectedOutletId) return;
+    
+    // Progressive validation (one field at a time)
+    if (!newItem.name.trim()) {
+      setErrors({ name: "Name is required" });
+      return;
+    }
+    if (!newItem.quantity) {
+      setErrors({ quantity: "Current stock is required" });
+      return;
+    }
+    if (!newItem.threshold) {
+      setErrors({ threshold: "Low stock threshold is required" });
+      return;
+    }
+    
+    // Clear previous errors if all valid
+    setErrors({});
+
+    if (!selectedOutletId) return;
 
     const qtyVal = parseFloat(newItem.quantity);
     const thresholdVal = parseFloat(newItem.threshold);
 
     if (isNaN(qtyVal) || qtyVal < 0 || isNaN(thresholdVal) || thresholdVal < 0) {
-      alert("Please enter a valid stock quantity and warning threshold greater than or equal to 0.");
+      setErrors({ general: "Please enter valid numbers greater than or equal to 0." });
       return;
     }
 
     await addDoc(collection(db, "inventory_items"), {
       outletId: selectedOutletId,
-      name: newItem.name,
+      name: newItem.name.trim(),
       quantity: qtyVal,
       unit: newItem.unit,
       threshold: thresholdVal
     });
     setIsAdding(false);
     setNewItem({ name: "", quantity: "", unit: "kg", threshold: "" });
+    setErrors({});
   };
 
   const adjustQuantity = async (id: string, current: number, change: number) => {
@@ -78,9 +100,7 @@ export function InventoryManager() {
 
   const lowStockItems = inventory.filter(item => item.quantity <= item.threshold);
 
-  if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-zinc-500 font-sans">Loading inventory...</div>;
-  }
+  // loading check removed to prevent UI stutter
 
   return (
     <div className="max-w-6xl mx-auto font-sans">
@@ -112,36 +132,63 @@ export function InventoryManager() {
       )}
 
       {isAdding && (
-        <form onSubmit={handleAdd} className="mb-8 p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
+        <form noValidate onSubmit={handleAdd} className="mb-8 p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
            <h3 className="text-lg font-semibold mb-4 text-zinc-900">Add New Inventory Item</h3>
+           {errors.general && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{errors.general}</div>}
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Name</label>
-                <input required type="text" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input type="text" value={newItem.name} onChange={e => { setNewItem({...newItem, name: e.target.value}); setErrors({...errors, name: undefined}); }} className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.name ? 'border-red-500 bg-red-50' : 'border-zinc-300'}`} />
+                {errors.name && <span className="text-xs text-red-500 mt-1 block">{errors.name}</span>}
              </div>
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Current Stock</label>
-                <input required type="number" step="any" value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input type="number" step="any" value={newItem.quantity} onChange={e => { setNewItem({...newItem, quantity: e.target.value}); setErrors({...errors, quantity: undefined}); }} className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.quantity ? 'border-red-500 bg-red-50' : 'border-zinc-300'}`} />
+                {errors.quantity && <span className="text-xs text-red-500 mt-1 block">{errors.quantity}</span>}
              </div>
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Unit</label>
-                <div className="relative flex items-center">
-                  <select value={newItem.unit} onChange={e => setNewItem({...newItem, unit: e.target.value})} className="w-full appearance-none rounded-md border border-zinc-300 pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
-                     <option>kg</option>
-                     <option>liters</option>
-                     <option>units</option>
-                     <option>gms</option>
-                  </select>
-                  <ChevronDown className="absolute right-2.5 w-4 h-4 text-zinc-400 pointer-events-none" />
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddUnitOpen(!isAddUnitOpen)}
+                    className="flex w-full items-center justify-between rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 bg-white shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    {newItem.unit || "Select Unit"}
+                    <ChevronDown className="w-4 h-4 text-zinc-400 pointer-events-none" />
+                  </button>
+                  {isAddUnitOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsAddUnitOpen(false)} />
+                      <div className="absolute left-0 mt-1 top-full w-full bg-white border border-zinc-200 rounded-lg shadow-xl z-50 py-1 max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-100">
+                        {unitOptions.map(u => (
+                          <button
+                            key={u}
+                            type="button"
+                            onClick={() => {
+                              setNewItem({...newItem, unit: u});
+                              setIsAddUnitOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-50 ${
+                              newItem.unit === u ? "text-orange-600 bg-orange-50/50" : "text-zinc-700"
+                            }`}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
              </div>
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Low Stock Threshold</label>
-                <input required type="number" step="any" value={newItem.threshold} onChange={e => setNewItem({...newItem, threshold: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input type="number" step="any" value={newItem.threshold} onChange={e => { setNewItem({...newItem, threshold: e.target.value}); setErrors({...errors, threshold: undefined}); }} className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.threshold ? 'border-red-500 bg-red-50' : 'border-zinc-300'}`} />
+                {errors.threshold && <span className="text-xs text-red-500 mt-1 block">{errors.threshold}</span>}
              </div>
            </div>
            <div className="flex justify-end gap-2">
-             <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors">Cancel</button>
+             <button type="button" onClick={() => { setIsAdding(false); setErrors({}); }} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors">Cancel</button>
              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-md transition-colors">Save Material</button>
            </div>
         </form>

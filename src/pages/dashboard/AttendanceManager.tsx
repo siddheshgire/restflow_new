@@ -57,7 +57,7 @@ export function AttendanceManager() {
   const displayRecords = Array.from(displayMap.values());
   const clockedInCount = records.filter(r => r.clockOut === null).length; // Global active count
 
-  if (loading) return <div className="flex items-center justify-center py-24 text-zinc-400">Loading attendance...</div>;
+  // loading check removed to prevent UI stutter
 
   return (
     <div className="max-w-5xl mx-auto">

@@ -3,7 +3,7 @@ import { ChefHat, MoveRight, LogOut, LayoutDashboard, User } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext";
 
 export function Navbar() {
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, outlets } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -34,6 +34,14 @@ export function Navbar() {
                   <User className="w-3.5 h-3.5 text-zinc-500" />
                   {role === "owner" ? "Owner" : role}
                 </div>
+                {role === "owner" && outlets && outlets.length > 0 && (
+                  <Link
+                    to="/select-branch"
+                    className="hidden md:flex text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition-colors"
+                  >
+                    Switch Branch
+                  </Link>
+                )}
                 
                 <Link
                   to="/dashboard"

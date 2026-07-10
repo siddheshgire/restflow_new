@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FileText, Package, Settings, LogOut, Users, Utensils, UserCircle, ChefHat, ChevronDown, ClipboardList } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -7,7 +6,6 @@ export function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, logout, outlets, selectedOutletId, setSelectedOutletId } = useAuth();
-  const [isOutletDropdownOpen, setIsOutletDropdownOpen] = useState(false);
 
   const allNavItems = [
     { name: "Overview", icon: LayoutDashboard, path: "/dashboard", roles: ['owner', 'manager'] },
@@ -100,38 +98,23 @@ export function DashboardLayout() {
             </h1>
             
             {/* Outlet Switcher for Owners */}
-            {role === 'owner' && outlets.length > 0 && (
+            {role === 'owner' && (
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Outlet:</span>
-                <div className="relative flex items-center">
-                  <button
-                    onClick={() => setIsOutletDropdownOpen(!isOutletDropdownOpen)}
-                    className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-1.5 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer relative"
+                <div className="flex items-center gap-2">
+                  <div className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-700 shadow-sm flex items-center gap-2">
+                    {outlets.find(o => o.id === selectedOutletId)?.name || "Not Selected"}
+                  </div>
+                  <Link
+                    to="/select-branch"
+                    onClick={() => {
+                      setSelectedOutletId("");
+                      localStorage.removeItem("selectedOutletId");
+                    }}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors"
                   >
-                    {outlets.find(o => o.id === selectedOutletId)?.name || "Select Outlet"}
-                    <ChevronDown className="absolute right-2.5 w-4 h-4 text-zinc-400 pointer-events-none" />
-                  </button>
-                  {isOutletDropdownOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setIsOutletDropdownOpen(false)} />
-                      <div className="absolute left-0 mt-1 top-full w-56 bg-white border border-zinc-200 rounded-xl shadow-xl z-40 py-1.5 animate-in fade-in slide-in-from-top-1 duration-100">
-                        {outlets.map((outlet) => (
-                          <button
-                            key={outlet.id}
-                            onClick={() => {
-                              setSelectedOutletId(outlet.id);
-                              setIsOutletDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors cursor-pointer hover:bg-zinc-50 ${
-                              selectedOutletId === outlet.id ? "text-orange-600 bg-orange-50/30" : "text-zinc-650 hover:text-zinc-950"
-                            }`}
-                          >
-                            {outlet.name} ({outlet.location})
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                    Switch Branch
+                  </Link>
                 </div>
               </div>
             )}

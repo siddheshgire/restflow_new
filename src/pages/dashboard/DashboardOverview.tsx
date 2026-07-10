@@ -8,6 +8,42 @@ import { db } from "../../lib/firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 
+const CustomChartTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-zinc-200 p-4 rounded-xl shadow-xl min-w-[150px]">
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 pb-2 border-b border-zinc-100">{label}</p>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center gap-4">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-600"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Revenue</span>
+            <span className="text-sm font-black text-orange-600">₹{payload[0].value.toLocaleString()}</span>
+          </div>
+          {payload[1] && (
+            <div className="flex justify-between items-center gap-4">
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-600"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Orders</span>
+              <span className="text-sm font-black text-purple-600">{payload[1].value}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg shadow-xl text-white">
+        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">{data.name}</p>
+        <p className="text-sm font-black text-white">₹{data.value.toLocaleString()}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function DashboardOverview() {
   const { user, selectedOutletId, outlets, role } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
@@ -161,42 +197,6 @@ export function DashboardOverview() {
 
   const PIE_COLORS = ['#f97316', '#8b5cf6', '#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#64748b'];
 
-  const CustomChartTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white border border-zinc-200 p-4 rounded-xl shadow-xl min-w-[150px]">
-          <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 pb-2 border-b border-zinc-100">{label}</p>
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center gap-4">
-              <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-600"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Revenue</span>
-              <span className="text-sm font-black text-orange-600">₹{payload[0].value.toLocaleString()}</span>
-            </div>
-            {payload[1] && (
-              <div className="flex justify-between items-center gap-4">
-                <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-600"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Orders</span>
-                <span className="text-sm font-black text-purple-600">{payload[1].value}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomPieTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      return (
-        <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg shadow-xl text-white">
-          <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">{data.name}</p>
-          <p className="text-sm font-black text-white">₹{data.value.toLocaleString()}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   // Tally best selling dishes — O(N*items) memoized
   const finalBestSellers = useMemo(() => {
     const tally: { [name: string]: { qty: number; total: number } } = {};
@@ -265,8 +265,8 @@ export function DashboardOverview() {
         id: doc.id,
         ...doc.data()
       })) as any[];
-      // O(n) filter — items where quantity has dropped below threshold
-      const lowStock = fetched.filter(item => item.quantity < item.threshold);
+      // O(n) filter — items where quantity has dropped to or below threshold
+      const lowStock = fetched.filter(item => item.quantity <= item.threshold);
       setLowStockItems(lowStock);
     }, (err) => {
       console.error("Error listening to inventory for low stock:", err);
@@ -295,9 +295,7 @@ export function DashboardOverview() {
 
   const finalSecurityLogs = securityLogs.slice(0, 5);
 
-  if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-zinc-500">Loading live metrics...</div>;
-  }
+  // loading check removed to prevent UI stutter
 
   if (!selectedOutletId) {
     return (
@@ -470,7 +468,7 @@ export function DashboardOverview() {
                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#a1a1aa', fontWeight: 600 }} dy={10} />
                         <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#a1a1aa', fontWeight: 600 }} dx={-10} />
                         <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={false} />
-                        <Tooltip content={<CustomChartTooltip />} cursor={{ stroke: '#f4f4f5', strokeWidth: 2, fill: 'transparent' }} />
+                        <Tooltip content={CustomChartTooltip} cursor={{ stroke: '#f4f4f5', strokeWidth: 2, fill: 'transparent' }} />
                         <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                         <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#8b5cf6', strokeWidth: 0 }} />
                        </ComposedChart>
@@ -499,7 +497,7 @@ export function DashboardOverview() {
                                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                              ))}
                            </Pie>
-                           <Tooltip content={<CustomPieTooltip />} />
+                           <Tooltip content={CustomPieTooltip} />
                            <Legend 
                              verticalAlign="bottom" 
                              height={36} 

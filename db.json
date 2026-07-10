@@ -7,7 +7,7 @@
       "hasCompletedOnboarding": true,
       "passwordHash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791",
       "createdAt": 1783708757869,
-      "currentSessionToken": "8mp7z170rlq1783710888060"
+      "currentSessionToken": "lzoekem1691783713403374"
     },
     "user-rahul-cravecraft-app": {
       "email": "rahul@cravecraft.app",
@@ -80,6 +80,26 @@
       "displayName": "siddheshgire45",
       "createdAt": 1783710293447,
       "currentSessionToken": "9isu28nz9ro1783710293471"
+    },
+    "user-owner-demo-co": {
+      "email": "owner@demo.co",
+      "role": "owner",
+      "isPaid": false,
+      "hasCompletedOnboarding": false,
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "displayName": "owner",
+      "createdAt": 1783711795293,
+      "currentSessionToken": "m5smpwps5z1783711795358"
+    },
+    "user-owner-demo-com": {
+      "email": "owner@demo.com",
+      "role": "owner",
+      "isPaid": true,
+      "hasCompletedOnboarding": false,
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "displayName": "owner",
+      "createdAt": 1783711815887,
+      "currentSessionToken": "ebf7tb02doi1783711815926"
     }
   },
   "restaurants": {
@@ -2045,7 +2065,7 @@
     "bz4u653sy7i": {
       "outletId": "s83vdell3or",
       "name": "Milk",
-      "quantity": 85,
+      "quantity": 22,
       "unit": "litres",
       "threshold": 20
     },
@@ -2234,7 +2254,7 @@
     "zmluzfioej": {
       "outletId": "s83vdell3or",
       "name": "Curd",
-      "quantity": 24,
+      "quantity": 11,
       "unit": "kg",
       "threshold": 6
     },
@@ -3219,6 +3239,134 @@
       "outletId": "",
       "message": "demo.owner signed in via Email.",
       "createdAt": 1783710888052
+    },
+    "0janhftb1qho": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783711229711
+    },
+    "n3j6q14ngjb": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783711758958
+    },
+    "6n2kd3txqya": {
+      "type": "login_success",
+      "email": "owner@demo.co",
+      "role": "owner",
+      "outletId": "",
+      "message": "New Owner owner registered and signed in.",
+      "createdAt": 1783711795320
+    },
+    "dmj9m2txcqb": {
+      "type": "login_success",
+      "email": "owner@demo.com",
+      "role": "owner",
+      "outletId": "",
+      "message": "New Owner owner registered and signed in.",
+      "createdAt": 1783711815911
+    },
+    "5hlt4ls94aj": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783711834511
+    },
+    "c5ky8mme0km": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783711893232
+    },
+    "xt96zwxanjq": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712006947
+    },
+    "rj42m8n839": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712126156
+    },
+    "ocjvekoh1n": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712155679
+    },
+    "21ux1btk86w": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712218991
+    },
+    "u36e04r5ae": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712375229
+    },
+    "cmc881lgrz": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712410158
+    },
+    "8lmnbyl4dca": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712489594
+    },
+    "nremqc4i4tp": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712500318
+    },
+    "n4vuhmlntu": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783712643889
+    },
+    "w8szncq6ji": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783713403357
     }
   },
   "attendance": {
