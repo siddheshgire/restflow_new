@@ -16,10 +16,24 @@ interface Employee {
 }
 
 export function EmployeeManager() {
-  const { selectedOutletId, outlets } = useAuth();
+  const { selectedOutletId, outlets, user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+
+  const logAudit = async (action: string, details: string) => {
+    try {
+      await addDoc(collection(db, "audit_logs"), {
+        action,
+        details,
+        ownerId: user?.uid || "UnknownOwner",
+        timestamp: Date.now(),
+        performedBy: user?.email || "Unknown User"
+      });
+    } catch (err) {
+      console.warn("Audit logging failed:", err);
+    }
+  };
   const [newEmp, setNewEmp] = useState({ name: "", email: "", role: "waiter", salary: "", outletId: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [editingEmp, setEditingEmp] = useState<Employee | null>(null);
@@ -159,17 +173,20 @@ export function EmployeeManager() {
       pin,
       activationCode
     });
+    await logAudit("Invite Employee", `Invited employee ${newEmp.name} (${newEmp.email}) as role ${newEmp.role}`);
     setIsAdding(false);
     setNewEmp({ name: "", email: "", role: "waiter", salary: "", outletId: selectedOutletId });
     setEmailError(null);
   };
 
   const handleDelete = async (id: string) => {
+    let empName = "Unknown";
     try {
       const { getDoc } = await import("firebase/firestore");
       const empSnap = await getDoc(doc(db, "employees", id));
       if (empSnap.exists()) {
         const empData = empSnap.data();
+        empName = empData.name || "Unknown";
         const cleanEmail = empData.email?.trim().toLowerCase();
         if (cleanEmail) {
           const uid = "user-" + cleanEmail.replace(/[^a-z0-9]/g, "-");
@@ -180,6 +197,7 @@ export function EmployeeManager() {
       console.error("Failed to clean up user record on employee delete:", err);
     }
     await deleteDoc(doc(db, "employees", id));
+    await logAudit("Delete Employee", `Deleted employee ${empName} (ID: ${id})`);
   };
 
   const handleSaveEditEmp = async (e: FormEvent) => {
@@ -199,6 +217,7 @@ export function EmployeeManager() {
       salary: salaryVal,
       outletId: editingEmp.outletId
     });
+    await logAudit("Edit Employee Details", `Updated details/role for employee ${editingEmp.name} (Role: ${editingEmp.role}, Salary: ₹${salaryVal})`);
     setEditingEmp(null);
   };
 

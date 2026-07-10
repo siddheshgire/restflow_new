@@ -12,11 +12,25 @@ interface Employee {
 }
 
 export function TableServiceConsole() {
-  const { selectedOutletId, role } = useAuth();
+  const { selectedOutletId, role, user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [staff, setStaff] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableCount, setTableCount] = useState(12);
+
+  const logAudit = async (action: string, details: string) => {
+    try {
+      await addDoc(collection(db, "audit_logs"), {
+        action,
+        details,
+        ownerId: user?.uid || "UnknownOwner",
+        timestamp: Date.now(),
+        performedBy: user?.email || "Unknown User"
+      });
+    } catch (err) {
+      console.warn("Audit logging failed:", err);
+    }
+  };
 
   // New Delivery / Takeaway states
   const [activeTab, setActiveTab] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
@@ -72,6 +86,7 @@ export function TableServiceConsole() {
 
     try {
       await updateDoc(doc(db, "outlets", selectedOutletId), { tableCount: nextCount });
+      await logAudit("Adjust Table Count", `Changed table count from ${tableCount} to ${nextCount} for outlet ${selectedOutletId}`);
     } catch (err) {
       console.error("Failed to update table count in DB:", err);
       alert("Failed to update table count. Please try again.");
@@ -199,10 +214,12 @@ export function TableServiceConsole() {
       updates.paymentMethod = paymentMethod;
     }
     await updateDoc(doc(db, "orders", orderId), updates);
+    await logAudit("Update Order Status", `Order ${orderId} status changed to ${status}${paymentMethod ? ` via ${paymentMethod}` : ""}`);
   };
 
   const assignRider = async (orderId: string, riderName: string) => {
     await updateDoc(doc(db, "orders", orderId), { deliveryRider: riderName });
+    await logAudit("Assign Delivery Rider", `Assigned rider ${riderName} to order ${orderId}`);
   };
 
   // Operations
@@ -257,7 +274,6 @@ export function TableServiceConsole() {
   };
 
   const handleCheckout = async (tableId: string, paymentMethod: string) => {
-    // Find all active unpaid orders for this table
     const activeTableOrders = orders.filter(o => o.tableId === tableId);
     
     for (const order of activeTableOrders) {
@@ -266,6 +282,7 @@ export function TableServiceConsole() {
           status: 'paid',
           paymentMethod
         });
+        await logAudit("Table Checkout", `Processed checkout for Table ${tableId} (Order ${order.id}) via ${paymentMethod}`);
       }
     }
   };
@@ -280,6 +297,7 @@ export function TableServiceConsole() {
     for (const order of activeTableOrders) {
       if (order.id) {
         await updateDoc(doc(db, "orders", order.id), { status: 'cancelled' });
+        await logAudit("Table Force Free", `Forcefully cleared and cancelled active sessions on Table ${tableToClear}`);
       }
     }
     setTableToClear(null);
