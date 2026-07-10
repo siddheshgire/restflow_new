@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Disable selection globally to feel like a native app */
+body {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow selection inside inputs and text fields so editing works */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
 @media screen {
   .print-only {
     display: none !important;
