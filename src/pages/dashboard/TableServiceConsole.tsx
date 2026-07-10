@@ -27,6 +27,7 @@ export function TableServiceConsole() {
   const [custPhone, setCustPhone] = useState("");
   const [deliveryAddr, setDeliveryAddr] = useState("");
   const [customQuantities, setCustomQuantities] = useState<Record<string, number>>({});
+  const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -763,18 +764,72 @@ export function TableServiceConsole() {
 
               {/* Menu items selection list */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Select Items</label>
-                <div className="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-56 overflow-y-auto p-1 bg-zinc-50">
-                  {menuItems.length === 0 ? (
-                    <p className="text-zinc-500 text-xs italic p-4 text-center">No available menu items.</p>
-                  ) : (
-                    menuItems.map((item) => {
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Select Items</label>
+                  
+                  {/* Diet Category Filter */}
+                  <div className="flex border border-zinc-200 rounded-lg bg-zinc-50 p-0.5 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setDietFilter('all')}
+                      className={`px-2 py-1 rounded transition-all cursor-pointer ${dietFilter === 'all' ? 'bg-white text-zinc-800 shadow-sm' : 'text-zinc-500'}`}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDietFilter('veg')}
+                      className={`px-2 py-1 rounded transition-all cursor-pointer ${dietFilter === 'veg' ? 'bg-white text-green-600 shadow-sm' : 'text-zinc-500'}`}
+                    >
+                      Veg 🌱
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDietFilter('non-veg')}
+                      className={`px-2 py-1 rounded transition-all cursor-pointer ${dietFilter === 'non-veg' ? 'bg-white text-red-600 shadow-sm' : 'text-zinc-500'}`}
+                    >
+                      Non-Veg 🍗
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-48 overflow-y-auto p-1 bg-zinc-50">
+                  {(() => {
+                    const isVegItem = (name: string) => {
+                      const lower = name.toLowerCase();
+                      const nonVegWords = ["chicken", "mutton", "fish", "meat", "pork", "beef", "bacon", "salami", "sausage", "pepperoni", "shrimp", "prawn", "egg"];
+                      if (nonVegWords.some(word => lower.includes(word))) {
+                        if (lower.includes("eggless")) return true;
+                        return false;
+                      }
+                      return true;
+                    };
+
+                    const filtered = menuItems.filter(item => {
+                      const isVeg = isVegItem(item.name);
+                      if (dietFilter === 'veg') return isVeg;
+                      if (dietFilter === 'non-veg') return !isVeg;
+                      return true;
+                    });
+
+                    if (filtered.length === 0) {
+                      return <p className="text-zinc-500 text-xs italic p-4 text-center">No matching menu items found.</p>;
+                    }
+
+                    return filtered.map((item) => {
                       const qty = customQuantities[item.id] || 0;
+                      const isVeg = isVegItem(item.name);
                       return (
                         <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-lg my-1 shadow-sm">
-                          <div>
-                            <p className="text-xs font-bold text-zinc-900">{item.name}</p>
-                            <p className="text-[10px] text-zinc-500">₹{item.price}</p>
+                          <div className="flex items-center gap-2">
+                            {/* Veg / Non-Veg Border Dot Indicator */}
+                            <span className={`w-3.5 h-3.5 flex items-center justify-center border rounded flex-shrink-0 ${isVeg ? "border-green-600 bg-green-50/10" : "border-red-600 bg-red-50/10"}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${isVeg ? "bg-green-600" : "bg-red-600"}`} />
+                            </span>
+                            <div>
+                              <p className="text-xs font-bold text-zinc-900">{item.name}</p>
+                              <p className="text-[10px] text-zinc-500">₹{item.price}</p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2.5">
                             <button
@@ -801,10 +856,37 @@ export function TableServiceConsole() {
                           </div>
                         </div>
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </div>
               </div>
+
+              {/* Total Summary Breakdown */}
+              {(() => {
+                const subtotal = Object.entries(customQuantities).reduce((sum, [itemId, qty]) => {
+                  const item = menuItems.find(m => m.id === itemId);
+                  return sum + (item?.price || 0) * qty;
+                }, 0);
+                const tax = subtotal * 0.05;
+                const grandTotal = subtotal + tax;
+
+                return (
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 space-y-1.5 text-xs text-zinc-600 font-medium">
+                    <div className="flex justify-between">
+                      <span>Items Subtotal:</span>
+                      <span className="text-zinc-900">₹{subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Taxes (CGST 2.5% + SGST 2.5%):</span>
+                      <span className="text-zinc-900">₹{tax.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-sm text-zinc-950 border-t border-zinc-200 pt-2 mt-1">
+                      <span>Grand Total:</span>
+                      <span className="text-orange-600">₹{grandTotal.toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100">
                 <button
@@ -812,6 +894,7 @@ export function TableServiceConsole() {
                   onClick={() => {
                     setIsCustomOrderOpen(false);
                     setCustomQuantities({});
+                    setDietFilter('all');
                   }}
                   className="px-4 py-2 border border-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold hover:bg-zinc-50 cursor-pointer"
                 >
