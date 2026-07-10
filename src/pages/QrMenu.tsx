@@ -110,7 +110,7 @@ export function QrMenu() {
   const cartTotal = cart.reduce((acc, curr) => acc + (curr.item.price * curr.qty), 0);
 
   const handlePlaceOrder = async () => {
-      if (cart.length === 0 || !outletId || !tableId) return;
+      if (cart.length === 0 || !outletId || !tableId || isOrdering) return;
       setIsOrdering(true);
       
       try {
@@ -196,6 +196,8 @@ export function QrMenu() {
       } catch (err) {
          console.error("Error placing order:", err);
          alert("Failed to place order. Please try again.");
+      } finally {
+         setIsOrdering(false);
       }
 
       setCart([]);
@@ -203,7 +205,6 @@ export function QrMenu() {
          localStorage.removeItem(`qrmenu_cart_${outletId}_${tableId}`);
       }
       setOrderPlaced(true);
-      setIsOrdering(false);
       
       // Reset after 5s
       setTimeout(() => setOrderPlaced(false), 5000);
