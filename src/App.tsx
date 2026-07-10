@@ -63,7 +63,7 @@ function App() {
               <Route path="menu" element={<ProtectedRoute requireRole={['owner', 'manager']}><MenuManager /></ProtectedRoute>} />
               <Route path="inventory" element={<ProtectedRoute requireRole={['owner', 'manager']}><InventoryManager /></ProtectedRoute>} />
               <Route path="employees" element={<ProtectedRoute requireRole={['owner']}><EmployeeManager /></ProtectedRoute>} />
-              <Route path="attendance" element={<ProtectedRoute requireRole={['owner']}><AttendanceManager /></ProtectedRoute>} />
+              <Route path="attendance" element={<ProtectedRoute requireRole={['owner', 'manager']}><AttendanceManager /></ProtectedRoute>} />
               <Route path="profile" element={<ProtectedRoute requireRole={['owner', 'manager', 'waiter', 'cook']}><EmployeeProfile /></ProtectedRoute>} />
               <Route path="waiter" element={<ProtectedRoute requireRole={['owner', 'manager', 'waiter']}><WaiterDashboard /></ProtectedRoute>} />
             </Route>

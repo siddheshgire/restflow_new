@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { User as UserIcon, Briefcase, IndianRupee, Store, LogIn, LogOut, Clock, Key, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, runTransaction } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
 export function EmployeeProfile() {
@@ -116,6 +116,32 @@ export function EmployeeProfile() {
     if (!user || !selectedOutletId || !profileData || attendanceLoading || isClockedIn) return;
     setAttendanceLoading(true);
     try {
+      // Check atomically if an open session already exists to prevent race conditions
+      // across multiple tabs or devices logged into the same account
+      const openSessionQuery = query(
+        collection(db, 'attendance'),
+        where('employeeId', '==', user.uid),
+        where('clockOut', '==', null)
+      );
+      const existingSnap = await getDocs(openSessionQuery);
+
+      if (!existingSnap.empty) {
+        // Session already open (possibly from another tab or device)
+        const existingDoc = existingSnap.docs[0];
+        const existingData = existingDoc.data();
+        if (existingData.outletId === selectedOutletId) {
+          // Restore local state from the existing session instead of creating a duplicate
+          setIsClockedIn(true);
+          setClockInTime(existingData.clockIn);
+          setAttendanceDocId(existingDoc.id);
+          localStorage.setItem(`attendance_session_${user.uid}`, JSON.stringify({ clockIn: existingData.clockIn, docId: existingDoc.id }));
+        } else {
+          alert('You are already clocked in at another branch. Please clock out there first.');
+        }
+        return;
+      }
+
+      // No open session found — safe to create a new one
       const now = Date.now();
       const date = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local format
       const res = await addDoc(collection(db, 'attendance'), {
@@ -133,7 +159,8 @@ export function EmployeeProfile() {
       setAttendanceDocId(docId);
       localStorage.setItem(`attendance_session_${user.uid}`, JSON.stringify({ clockIn: now, docId }));
     } catch (err) {
-      console.error("Clock-in failed:", err);
+      console.error('Clock-in failed:', err);
+      alert('Clock-in failed. Please try again.');
     } finally {
       setAttendanceLoading(false);
     }

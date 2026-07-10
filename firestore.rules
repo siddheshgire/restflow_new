@@ -42,5 +42,12 @@ service cloud.firestore {
     match /inventory_items/{itemId} {
       allow read, write: if request.auth != null;
     }
+
+    // Immutable Audit Logs ledger: write-only, read-restricted, no deletes/updates
+    match /audit_logs/{logId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow update, delete: if false;
+    }
   }
 }
