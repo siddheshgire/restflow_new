@@ -43,6 +43,7 @@ export function TableServiceConsole() {
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
   const [deliveryAddr, setDeliveryAddr] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [customQuantities, setCustomQuantities] = useState<Record<string, number>>({});
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
 
@@ -70,7 +71,7 @@ export function TableServiceConsole() {
   }, [selectedOutletId]);
 
   const adjustTableCount = async (change: number) => {
-    if (!selectedOutletId) return;
+    if (!selectedOutletId || isProcessing) return;
     const nextCount = tableCount + change;
     if (nextCount < 1) return;
 
@@ -88,11 +89,14 @@ export function TableServiceConsole() {
     }
 
     try {
+      setIsProcessing(true);
       await updateDoc(doc(db, "outlets", selectedOutletId), { tableCount: nextCount });
       await logAudit("Adjust Table Count", `Changed table count from ${tableCount} to ${nextCount} for outlet ${selectedOutletId}`);
     } catch (err) {
       console.error("Failed to update table count in DB:", err);
       alert("Failed to update table count. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -160,7 +164,7 @@ export function TableServiceConsole() {
 
   const handleCreateCustomOrder = async (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedOutletId || !custName || !custPhone) return;
+    if (!selectedOutletId || !custName || !custPhone || isProcessing) return;
     if (customOrderType === 'delivery' && !deliveryAddr) return;
 
     const selectedItems = Object.entries(customQuantities)
@@ -186,6 +190,7 @@ export function TableServiceConsole() {
     const total = subtotal + cgst + sgst;
 
     try {
+      setIsProcessing(true);
       await addDoc(collection(db, "orders"), {
         outletId: selectedOutletId,
         tableId: customOrderType === 'takeaway' ? 'Takeaway' : 'Delivery',
@@ -208,27 +213,41 @@ export function TableServiceConsole() {
     } catch (err) {
       console.error("Error creating custom order:", err);
       alert("Failed to place order.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const updateCustomOrderStatus = async (orderId: string, status: string, paymentMethod?: string) => {
+    if (isProcessing) return;
     const updates: any = { status };
     if (paymentMethod) {
       updates.paymentMethod = paymentMethod;
     }
-    await updateDoc(doc(db, "orders", orderId), updates);
-    await logAudit("Update Order Status", `Order ${orderId} status changed to ${status}${paymentMethod ? ` via ${paymentMethod}` : ""}`);
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), updates);
+      await logAudit("Update Order Status", `Order ${orderId} status changed to ${status}${paymentMethod ? ` via ${paymentMethod}` : ""}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const assignRider = async (orderId: string, riderName: string) => {
-    await updateDoc(doc(db, "orders", orderId), { deliveryRider: riderName });
-    await logAudit("Assign Delivery Rider", `Assigned rider ${riderName} to order ${orderId}`);
+    if (isProcessing) return;
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), { deliveryRider: riderName });
+      await logAudit("Assign Delivery Rider", `Assigned rider ${riderName} to order ${orderId}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Operations
   const handleAssign = async (e: FormEvent) => {
     e.preventDefault();
-    if (!activeTableId || !selectedOutletId) return;
+    if (!activeTableId || !selectedOutletId || isProcessing) return;
     if (!selectedWaiter) {
       alert("Please select a Waiter before starting service.");
       return;
@@ -238,35 +257,40 @@ export function TableServiceConsole() {
     const activeTableOrders = orders.filter(o => o.tableId === activeTableId);
     const isCurrentlyOccupied = activeTableOrders.length > 0;
 
-    if (isCurrentlyOccupied) {
-      // Reassign waiter and update guest count on all active orders of this table
-      for (const order of activeTableOrders) {
-        if (order.id) {
-          await updateDoc(doc(db, "orders", order.id), {
-            waiterName: selectedWaiter || "Unassigned",
-            guests: parseInt(guestsCount) || 2
-          });
-        }
-      }
-    } else {
-      // Start a Guest Table Service session by placing an empty/starter order
-      await addDoc(collection(db, "orders"), {
-        outletId: selectedOutletId,
-        tableId: activeTableId,
-        items: [
-          {
-            menuItemId: "starter-occupy",
-            name: "Guest Table Service Started",
-            price: 0,
-            quantity: 1
+    try {
+      setIsProcessing(true);
+      if (isCurrentlyOccupied) {
+        // Reassign waiter and update guest count on all active orders of this table
+        for (const order of activeTableOrders) {
+          if (order.id) {
+            await updateDoc(doc(db, "orders", order.id), {
+              waiterName: selectedWaiter || "Unassigned",
+              guests: parseInt(guestsCount) || 2
+            });
           }
-        ],
-        total: 0,
-        status: "pending",
-        waiterName: selectedWaiter || "Unassigned",
-        guests: parseInt(guestsCount) || 2,
-        createdAt: Date.now()
-      });
+        }
+      } else {
+        // Start a Guest Table Service session by placing an empty/starter order
+        await addDoc(collection(db, "orders"), {
+          outletId: selectedOutletId,
+          tableId: activeTableId,
+          items: [
+            {
+              menuItemId: "starter-occupy",
+              name: "Guest Table Service Started",
+              price: 0,
+              quantity: 1
+            }
+          ],
+          total: 0,
+          status: "pending",
+          waiterName: selectedWaiter || "Unassigned",
+          guests: parseInt(guestsCount) || 2,
+          createdAt: Date.now()
+        });
+      }
+    } finally {
+      setIsProcessing(false);
     }
 
     // Reset Modal
@@ -277,16 +301,22 @@ export function TableServiceConsole() {
   };
 
   const handleCheckout = async (tableId: string, paymentMethod: string) => {
+    if (isProcessing) return;
     const activeTableOrders = orders.filter(o => o.tableId === tableId);
     
-    for (const order of activeTableOrders) {
-      if (order.id) {
-        await updateDoc(doc(db, "orders", order.id), {
-          status: 'paid',
-          paymentMethod
-        });
-        await logAudit("Table Checkout", `Processed checkout for Table ${tableId} (Order ${order.id}) via ${paymentMethod}`);
+    try {
+      setIsProcessing(true);
+      for (const order of activeTableOrders) {
+        if (order.id) {
+          await updateDoc(doc(db, "orders", order.id), {
+            status: 'paid',
+            paymentMethod
+          });
+          await logAudit("Table Checkout", `Processed checkout for Table ${tableId} (Order ${order.id}) via ${paymentMethod}`);
+        }
       }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -295,15 +325,20 @@ export function TableServiceConsole() {
   };
 
   const executeForceClear = async () => {
-    if (!tableToClear) return;
+    if (!tableToClear || isProcessing) return;
     const activeTableOrders = orders.filter(o => o.tableId === tableToClear);
-    for (const order of activeTableOrders) {
-      if (order.id) {
-        await updateDoc(doc(db, "orders", order.id), { status: 'cancelled' });
-        await logAudit("Table Force Free", `Forcefully cleared and cancelled active sessions on Table ${tableToClear}`);
+    try {
+      setIsProcessing(true);
+      for (const order of activeTableOrders) {
+        if (order.id) {
+          await updateDoc(doc(db, "orders", order.id), { status: 'cancelled' });
+          await logAudit("Table Force Free", `Forcefully cleared and cancelled active sessions on Table ${tableToClear}`);
+        }
       }
+    } finally {
+      setIsProcessing(false);
+      setTableToClear(null);
     }
-    setTableToClear(null);
   };
 
   const openAssignModal = (tableId: string) => {

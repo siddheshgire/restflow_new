@@ -13,6 +13,7 @@ export function WaiterDashboard() {
   const [waiterName, setWaiterName] = useState("");
   const [notification, setNotification] = useState<{ show: boolean; tableId: string } | null>(null);
   const [readyNotification, setReadyNotification] = useState<{ show: boolean; tableId: string } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const isInitializedRef = useRef(false);
   const prevAssignedOrderIds = useRef<Set<string>>(new Set());
@@ -193,41 +194,75 @@ export function WaiterDashboard() {
   }, [selectedOutletId]);
 
   const markPaid = async (orderId: string, method: string) => {
+    if (isProcessing) return;
     const order = orders.find(o => o.id === orderId);
     const updates: any = { status: 'paid', paymentMethod: method };
     if (order && (!order.waiterName || order.waiterName === 'Unassigned') && waiterName) {
       updates.waiterName = waiterName;
     }
-    await updateDoc(doc(db, "orders", orderId), updates);
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), updates);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const markDelivered = async (orderId: string) => {
+    if (isProcessing) return;
     const order = orders.find(o => o.id === orderId);
     const updates: any = { status: 'delivered' };
     if (order && (!order.waiterName || order.waiterName === 'Unassigned') && waiterName) {
       updates.waiterName = waiterName;
     }
-    await updateDoc(doc(db, "orders", orderId), updates);
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), updates);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const cancelOrder = async (orderId: string) => {
+    if (isProcessing) return;
     if (confirm("Are you sure you want to cancel this order?")) {
-      await updateDoc(doc(db, "orders", orderId), { status: 'cancelled' });
+      try {
+        setIsProcessing(true);
+        await updateDoc(doc(db, "orders", orderId), { status: 'cancelled' });
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
   const claimTable = async (orderId: string) => {
-    if (!waiterName) return;
-    await updateDoc(doc(db, "orders", orderId), { waiterName });
+    if (!waiterName || isProcessing) return;
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), { waiterName });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const claimDelivery = async (orderId: string) => {
-    if (!waiterName) return;
-    await updateDoc(doc(db, "orders", orderId), { deliveryRider: waiterName });
+    if (!waiterName || isProcessing) return;
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), { deliveryRider: waiterName });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const startDelivery = async (orderId: string) => {
-    await updateDoc(doc(db, "orders", orderId), { status: 'out-for-delivery' });
+    if (isProcessing) return;
+    try {
+      setIsProcessing(true);
+      await updateDoc(doc(db, "orders", orderId), { status: 'out-for-delivery' });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (loading) {
