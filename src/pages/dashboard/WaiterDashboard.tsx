@@ -14,6 +14,38 @@ export function WaiterDashboard() {
   const [notification, setNotification] = useState<{ show: boolean; tableId: string } | null>(null);
   const [readyNotification, setReadyNotification] = useState<{ show: boolean; tableId: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [audioAlertsUnlocked, setAudioAlertsUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const tempCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (tempCtx.state === 'running') {
+        setAudioAlertsUnlocked(true);
+      }
+      tempCtx.close();
+    } catch (e) {
+      console.warn("Initial AudioContext check failed:", e);
+    }
+
+    const unlock = () => {
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (context.state === 'suspended') {
+          context.resume().then(() => {
+            setAudioAlertsUnlocked(true);
+            window.removeEventListener('click', unlock);
+          });
+        } else {
+          setAudioAlertsUnlocked(true);
+          window.removeEventListener('click', unlock);
+        }
+      } catch (err) {
+        console.warn("Audio Context unlock error:", err);
+      }
+    };
+    window.addEventListener('click', unlock);
+    return () => window.removeEventListener('click', unlock);
+  }, []);
 
   const isInitializedRef = useRef(false);
   const prevAssignedOrderIds = useRef<Set<string>>(new Set());
@@ -300,6 +332,20 @@ export function WaiterDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto pb-12">
+      {!audioAlertsUnlocked && (
+        <div className="bg-orange-600/10 border border-orange-500/20 text-orange-600 px-4 py-2.5 rounded-lg mb-6 text-xs font-semibold flex items-center justify-between animate-pulse">
+          <span>🔊 Sound alerts are blocked by your browser. Click anywhere on this page to activate table assignment notifications.</span>
+          <button 
+            onClick={() => {
+              const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+              context.resume().then(() => setAudioAlertsUnlocked(true));
+            }}
+            className="bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded font-bold cursor-pointer transition-colors"
+          >
+            Enable Sounds
+          </button>
+        </div>
+      )}
       {/* Table allotment toast alert */}
       {notification && notification.show && (
         <div className="fixed top-5 right-5 z-50 animate-in fade-in slide-in-from-top duration-300">

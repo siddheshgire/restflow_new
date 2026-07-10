@@ -34,6 +34,39 @@ export function KitchenDisplay() {
     setCheckedItems(prev => ({ ...prev, [key]: !prev[key] }));
   };
   
+  const [audioAlertsUnlocked, setAudioAlertsUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const tempCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (tempCtx.state === 'running') {
+        setAudioAlertsUnlocked(true);
+      }
+      tempCtx.close();
+    } catch (e) {
+      console.warn("Initial AudioContext check failed:", e);
+    }
+
+    const unlock = () => {
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (context.state === 'suspended') {
+          context.resume().then(() => {
+            setAudioAlertsUnlocked(true);
+            window.removeEventListener('click', unlock);
+          });
+        } else {
+          setAudioAlertsUnlocked(true);
+          window.removeEventListener('click', unlock);
+        }
+      } catch (err) {
+        console.warn("Audio Context unlock error:", err);
+      }
+    };
+    window.addEventListener('click', unlock);
+    return () => window.removeEventListener('click', unlock);
+  }, []);
+
   const prevOrderIdsRef = useRef<Set<string>>(new Set());
   const isInitializedRef = useRef(false);
 
@@ -218,6 +251,21 @@ export function KitchenDisplay() {
 
   return (
     <div className="min-h-screen bg-zinc-950 font-sans text-white p-6">
+      {!audioAlertsUnlocked && !isMuted && (
+        <div className="bg-orange-600/10 border border-orange-500/20 text-orange-400 px-4 py-2.5 rounded-lg mb-6 text-xs font-semibold flex items-center justify-between animate-pulse">
+          <span>🔊 Sound alerts are blocked by your browser. Click anywhere on this page to activate order bell chimes.</span>
+          <button 
+            onClick={() => {
+              const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+              context.resume().then(() => setAudioAlertsUnlocked(true));
+            }}
+            className="bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded font-bold cursor-pointer transition-colors"
+          >
+            Enable Sounds
+          </button>
+        </div>
+      )}
+
       <header className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
         <div>
            <Link to="/dashboard" className="text-zinc-400 hover:text-white flex items-center gap-2 mb-2 text-sm transition-colors"><ChevronLeft className="w-4 h-4" /> Back to Dashboard</Link>
