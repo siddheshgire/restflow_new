@@ -40,18 +40,22 @@ export function AttendanceManager() {
     return () => unsub();
   }, [selectedOutletId]);
 
+  const todayDateStr = new Date().toLocaleDateString('en-CA');
+
   // 1. Get records for the selected date
   const dateRecords = records.filter(r => r.date === dateFilter);
-  // 2. Get all currently active (clocked in) records across ALL dates (Night Shift Bug Fix)
-  const activeRecords = records.filter(r => r.clockOut === null);
   
-  // 3. Merge them uniquely by ID so active shifts are ALWAYS visible
+  // 3. Merge them uniquely by ID. If viewing Today, also include any active shifts (Night Shift Bug Fix)
   const displayMap = new Map<string, AttendanceItem>();
   dateRecords.forEach(r => displayMap.set(r.id, r));
-  activeRecords.forEach(r => displayMap.set(r.id, r));
+  
+  if (dateFilter === todayDateStr) {
+    const activeRecords = records.filter(r => r.clockOut === null);
+    activeRecords.forEach(r => displayMap.set(r.id, r));
+  }
   
   const displayRecords = Array.from(displayMap.values());
-  const clockedInCount = activeRecords.length; // Global active count
+  const clockedInCount = records.filter(r => r.clockOut === null).length; // Global active count
 
   if (loading) return <div className="flex items-center justify-center py-24 text-zinc-400">Loading attendance...</div>;
 

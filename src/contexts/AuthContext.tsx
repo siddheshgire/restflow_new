@@ -217,6 +217,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userDocUnsubscribe = onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
               const data = snap.data();
+              
+              // LIVE UPDATE: Role changes reflect instantly without refresh
+              if (data.role && data.role !== role) {
+                setRole(data.role);
+              }
+
               const dbSessionToken = data.currentSessionToken;
               const curLocalSessionToken = localStorage.getItem("active_session_token");
               if (dbSessionToken && curLocalSessionToken && dbSessionToken !== curLocalSessionToken) {

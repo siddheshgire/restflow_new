@@ -97,7 +97,15 @@ export function DashboardOverview() {
     orders.filter(o => o.status !== 'paid' && o.status !== 'delivered')
   , [orders]);
 
-  const occupiedTablesCount = useMemo(() => new Set(activeOrders.map(o => o.tableId)).size, [activeOrders]);
+  const occupiedTablesCount = useMemo(() => {
+    const dineInOrders = activeOrders.filter(o => 
+      o.orderType !== 'takeaway' && 
+      o.orderType !== 'delivery' && 
+      o.tableId !== 'Takeaway' && 
+      o.tableId !== 'Delivery'
+    );
+    return new Set(dineInOrders.map(o => o.tableId)).size;
+  }, [activeOrders]);
   const occupancyRate = useMemo(() => Math.min(100, Math.round((occupiedTablesCount / tableCount) * 100)), [occupiedTablesCount, tableCount]);
 
   const paidOrders = useMemo(() => filteredOrders.filter(o => o.status === 'paid'), [filteredOrders]);

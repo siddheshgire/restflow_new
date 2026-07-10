@@ -217,6 +217,17 @@ export function EmployeeManager() {
       salary: salaryVal,
       outletId: editingEmp.outletId
     });
+
+    if (editingEmp.email) {
+      try {
+        const cleanEmail = editingEmp.email.trim().toLowerCase();
+        const uid = "user-" + cleanEmail.replace(/[^a-z0-9]/g, "-");
+        await updateDoc(doc(db, "users", uid), { role: editingEmp.role });
+      } catch (err) {
+        console.error("Could not update user record role, maybe it does not exist yet.", err);
+      }
+    }
+
     await logAudit("Edit Employee Details", `Updated details/role for employee ${editingEmp.name} (Role: ${editingEmp.role}, Salary: ₹${salaryVal})`);
     setEditingEmp(null);
   };

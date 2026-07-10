@@ -143,7 +143,7 @@ export function KitchenDisplay() {
   // Prevents waiter seeing a blank page after their page's tickets are cleared
   useEffect(() => {
     const filteredCount = orders.filter(order => {
-      if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
+      if (order.orderType === 'takeaway' || order.orderType === 'delivery' || order.tableId === 'Takeaway' || order.tableId === 'Delivery') {
         return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
       }
       return true;
@@ -342,7 +342,7 @@ export function KitchenDisplay() {
       </header>
       {(() => {
         const filteredActiveOrders = orders.filter(order => {
-          if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
+          if (order.orderType === 'takeaway' || order.orderType === 'delivery' || order.tableId === 'Takeaway' || order.tableId === 'Delivery') {
             return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
           }
           return true;
@@ -394,9 +394,9 @@ export function KitchenDisplay() {
                     <div className="p-5">
                        <div className="flex justify-between items-start mb-4">
                           <div>
-                             {order.orderType === 'takeaway' ? (
+                             {order.orderType === 'takeaway' || order.tableId === 'Takeaway' ? (
                                 <div className="text-xl font-black text-blue-400">Takeaway 🛍️</div>
-                             ) : order.orderType === 'delivery' ? (
+                             ) : order.orderType === 'delivery' || order.tableId === 'Delivery' ? (
                                 <div className="text-xl font-black text-purple-400">Delivery 🛵</div>
                              ) : (
                                 <div className="text-3xl font-black tabular-nums tracking-tight">T-{order.tableId}</div>
