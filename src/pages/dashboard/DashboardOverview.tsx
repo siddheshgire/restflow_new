@@ -241,7 +241,7 @@ export function DashboardOverview() {
   const [activeStaff, setActiveStaff] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!selectedOutletId) return;
+    if (!selectedOutletId || role === 'waiter' || role === 'cook') return;
 
     if (role === 'owner') {
       const q = query(
@@ -265,30 +265,33 @@ export function DashboardOverview() {
       });
 
       return () => unsubscribe();
-    } else {
-      // Fetch low stock items for managers
-      const q = query(
-        collection(db, "inventory_items"),
-        where("outletId", "==", selectedOutletId)
-      );
-
-      const unsubscribeInventory = onSnapshot(q, (snapshot) => {
-        const fetched = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as any[];
-        // Filter in memory for items below threshold
-        const lowStock = fetched.filter(item => item.quantity < item.threshold);
-        setLowStockItems(lowStock);
-      }, (err) => {
-        console.error("Error listening to inventory items for manager:", err);
-      });
-
-      return () => {
-         unsubscribeInventory();
-      };
     }
   }, [selectedOutletId, role]);
+
+  // Fetch low stock items for BOTH owners and managers (separate effect)
+  useEffect(() => {
+    if (!selectedOutletId || role === 'waiter' || role === 'cook') return;
+
+    const q = query(
+      collection(db, "inventory_items"),
+      where("outletId", "==", selectedOutletId)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as any[];
+      // O(n) filter — items where quantity has dropped below threshold
+      const lowStock = fetched.filter(item => item.quantity < item.threshold);
+      setLowStockItems(lowStock);
+    }, (err) => {
+      console.error("Error listening to inventory for low stock:", err);
+    });
+
+    return () => unsubscribe();
+  }, [selectedOutletId, role]);
+
 
   // Fetch Active Staff (for both roles)
   useEffect(() => {
@@ -355,6 +358,24 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto font-sans">
+      {/* Low Stock Alert Banner — shown to owner & manager when any inventory item is below threshold */}
+      {lowStockItems.length > 0 && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 shadow-sm">
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-red-700">
+              ⚠️ {lowStockItems.length} inventory item{lowStockItems.length > 1 ? 's are' : ' is'} running low!
+            </p>
+            <p className="text-xs text-red-500 mt-0.5">
+              {lowStockItems.slice(0, 3).map(i => `${i.name} (${i.quantity} ${i.unit} left)`).join(' • ')}
+              {lowStockItems.length > 3 ? ` • +${lowStockItems.length - 3} more` : ''}
+            </p>
+          </div>
+          <Link to="/dashboard/inventory" className="shrink-0 text-xs font-bold text-red-600 hover:text-red-800 underline underline-offset-2 transition-colors">
+            View Inventory
+          </Link>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 pb-6 screen-only">
         <div>
            <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Good morning, {welcomeName}</h2>
