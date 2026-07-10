@@ -34,6 +34,7 @@ export function KitchenDisplay() {
     setCheckedItems(prev => ({ ...prev, [key]: !prev[key] }));
   };
   
+  const [currentPage, setCurrentPage] = useState(1);
   const [audioAlertsUnlocked, setAudioAlertsUnlocked] = useState(false);
 
   useEffect(() => {
@@ -70,13 +71,14 @@ export function KitchenDisplay() {
   const prevOrderIdsRef = useRef<Set<string>>(new Set());
   const isInitializedRef = useRef(false);
 
-  // Reset tracking and auth state on outlet ID changes to prevent false kitchen bell rings & security bypasses
+  // Reset tracking, auth, and pagination state on outlet ID changes to prevent false kitchen bell rings & security bypasses
   useEffect(() => {
     isInitializedRef.current = false;
     prevOrderIdsRef.current = new Set();
     setIsAuthenticated(checkAuth());
     setPinInput("");
     setPinError(false);
+    setCurrentPage(1);
   }, [outletId]);
 
   // High pitch kitchen chime sound
@@ -323,111 +325,141 @@ export function KitchenDisplay() {
           </div>
         </div>
       </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
-        <AnimatePresence>
-          {orders
-            .filter(order => {
-              if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
-                return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
-              }
-              return true;
-            })
-            .map((order) => (
-              <motion.div
-                key={order.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                className={`rounded-xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-1000`}
-              >
-                <div className="p-5">
-                   <div className="flex justify-between items-start mb-4">
-                      <div>
-                         {order.orderType === 'takeaway' ? (
-                            <div className="text-xl font-black text-blue-400">Takeaway 🛍️</div>
-                         ) : order.orderType === 'delivery' ? (
-                            <div className="text-xl font-black text-purple-400">Delivery 🛵</div>
-                         ) : (
-                            <div className="text-3xl font-black tabular-nums tracking-tight">T-{order.tableId}</div>
-                         )}
-                         <div className="flex items-center gap-1.5 text-zinc-400 text-sm mt-1">
-                            <Clock className="w-4 h-4" />
-                            {formatDistanceToNow(order.createdAt, { addSuffix: true })}
-                         </div>
-                         {order.customerName && (
-                            <div className="text-xs font-semibold text-zinc-400 mt-2">
-                               Customer: {order.customerName}
-                            </div>
-                         )}
-                      </div>
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors duration-1000 ${getBadgeColorClass(order)}`}>
-                         {order.status}
-                      </span>
-                   </div>
-                   
-                   <ul className="space-y-3 mt-6">
-                      {order.items
-                         .filter((item: any) => item.menuItemId !== "starter-occupy")
-                         .map((item, idx) => {
-                            const isChecked = !!checkedItems[`${order.id}-${idx}`];
-                            return (
-                              <li 
-                                 key={idx} 
-                                 onClick={() => toggleItemCheck(order.id, idx)}
-                                 className={`flex items-start gap-3.5 text-lg font-semibold cursor-pointer select-none transition-all ${
-                                    isChecked ? 'opacity-35 line-through text-zinc-500' : 'text-zinc-100 hover:text-orange-200'
-                                 }`}
-                              >
-                                 <span className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-bold mt-1 transition-all ${
-                                    isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-zinc-700 bg-zinc-900 text-transparent hover:border-orange-500'
-                                 }`}>
-                                    ✓
-                                 </span>
-                                 <div>
-                                    <span className="text-orange-500 font-extrabold mr-2">{item.quantity}x</span>
-                                    <span>{item.name}</span>
-                                 </div>
-                              </li>
-                            );
-                      })}
-                   </ul>
-                </div>
-                
-                <div className="p-4 mt-4 border-t border-zinc-800/50">
-                   {order.status !== 'ready' ? (
-                      <button
-                        onClick={() => updateStatus(order.id, order.status)}
-                        className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors ${order.status === 'pending' ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
-                      >
-                         {order.status === 'pending' ? 'Start Preparing' : 'Mark Ready'}
-                      </button>
-                   ) : (
-                      <button
-                        onClick={() => markDelivered(order.id)}
-                        className="w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex justify-center items-center gap-2"
-                      >
-                         <CheckCircle2 className="w-5 h-5" /> Delivered to Table
-                      </button>
-                   )}
-                </div>
-              </motion.div>
-            ))}
-        </AnimatePresence>
-        
-        {orders.filter(order => {
+      {(() => {
+        const filteredActiveOrders = orders.filter(order => {
           if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
             return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
           }
           return true;
-        }).length === 0 && (
-           <div className="col-span-full py-24 text-center text-zinc-500">
-              <Utensils className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p className="text-xl font-medium tracking-tight">Kitchen is clear. Waiting for orders...</p>
-           </div>
-        )}
-      </div>
+        });
+
+        const totalPages = Math.ceil(filteredActiveOrders.length / 12);
+        const slicedOrders = filteredActiveOrders.slice((currentPage - 1) * 12, currentPage * 12);
+
+        return (
+          <>
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center bg-zinc-900 border border-zinc-850 p-4 rounded-xl mb-6 shadow-md font-sans">
+                <div className="text-zinc-400 text-sm font-semibold">
+                  Showing <span className="text-white font-extrabold">{((currentPage - 1) * 12) + 1} - {Math.min(filteredActiveOrders.length, currentPage * 12)}</span> of <span className="text-orange-500 font-extrabold">{filteredActiveOrders.length}</span> active tickets
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-950 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                  >
+                    Previous Page
+                  </button>
+                  <span className="text-zinc-400 text-xs font-bold">
+                    Page <span className="text-white">{currentPage}</span> of <span className="text-white">{totalPages}</span>
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-950 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                  >
+                    Next Page
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
+              <AnimatePresence>
+                {slicedOrders.map((order) => (
+                  <motion.div
+                    key={order.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    className={`rounded-xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-1000`}
+                  >
+                    <div className="p-5">
+                       <div className="flex justify-between items-start mb-4">
+                          <div>
+                             {order.orderType === 'takeaway' ? (
+                                <div className="text-xl font-black text-blue-400">Takeaway 🛍️</div>
+                             ) : order.orderType === 'delivery' ? (
+                                <div className="text-xl font-black text-purple-400">Delivery 🛵</div>
+                             ) : (
+                                <div className="text-3xl font-black tabular-nums tracking-tight">T-{order.tableId}</div>
+                             )}
+                             <div className="flex items-center gap-1.5 text-zinc-400 text-sm mt-1">
+                                <Clock className="w-4 h-4" />
+                                {formatDistanceToNow(order.createdAt, { addSuffix: true })}
+                             </div>
+                             {order.customerName && (
+                                <div className="text-xs font-semibold text-zinc-400 mt-2">
+                                   Customer: {order.customerName}
+                                </div>
+                             )}
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors duration-1000 ${getBadgeColorClass(order)}`}>
+                             {order.status}
+                          </span>
+                       </div>
+                       
+                       <ul className="space-y-3 mt-6">
+                          {order.items
+                             .filter((item: any) => item.menuItemId !== "starter-occupy")
+                             .map((item, idx) => {
+                                const isChecked = !!checkedItems[`${order.id}-${idx}`];
+                                return (
+                                  <li 
+                                     key={idx} 
+                                     onClick={() => toggleItemCheck(order.id, idx)}
+                                     className={`flex items-start gap-3.5 text-lg font-semibold cursor-pointer select-none transition-all ${
+                                        isChecked ? 'opacity-35 line-through text-zinc-500' : 'text-zinc-100 hover:text-orange-200'
+                                     }`}
+                                  >
+                                     <span className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-bold mt-1 transition-all ${
+                                        isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-zinc-700 bg-zinc-900 text-transparent hover:border-orange-500'
+                                     }`}>
+                                        ✓
+                                     </span>
+                                     <div>
+                                        <span className="text-orange-500 font-extrabold mr-2">{item.quantity}x</span>
+                                        <span>{item.name}</span>
+                                     </div>
+                                  </li>
+                                );
+                          })}
+                       </ul>
+                    </div>
+                    
+                    <div className="p-4 mt-4 border-t border-zinc-800/50">
+                       {order.status !== 'ready' ? (
+                          <button
+                            onClick={() => updateStatus(order.id, order.status)}
+                            className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors ${order.status === 'pending' ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                          >
+                             {order.status === 'pending' ? 'Start Preparing' : 'Mark Ready'}
+                          </button>
+                       ) : (
+                          <button
+                            onClick={() => markDelivered(order.id)}
+                            className="w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex justify-center items-center gap-2"
+                          >
+                             <CheckCircle2 className="w-5 h-5" /> Delivered to Table
+                          </button>
+                       )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {filteredActiveOrders.length === 0 && (
+                 <div className="col-span-full py-24 text-center text-zinc-500">
+                    <Utensils className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-xl font-medium tracking-tight">Kitchen is clear. Waiting for orders...</p>
+                 </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
