@@ -142,7 +142,21 @@ export function QrMenu() {
 
          if (orderItems.length === 0) {
             alert("Your items are currently out of stock or unavailable. Please refresh the menu.");
-            setIsOrdering(false);
+            return;
+         }
+
+         // SECURITY CHECK: Validate that the tableId exists in this outlet's actual table configuration
+         // Prevents fake/tampered URLs from placing orders on non-existent tables
+         const outletSnap = await getDoc(doc(db, "outlets", outletId));
+         if (!outletSnap.exists()) {
+            alert("Invalid outlet. Please scan the QR code again.");
+            return;
+         }
+         const configuredTableCount: number = outletSnap.data().tableCount || 12;
+         const tableNumber = parseInt(tableId, 10);
+         const isValidTable = !isNaN(tableNumber) && tableNumber >= 1 && tableNumber <= configuredTableCount;
+         if (!isValidTable) {
+            alert("Invalid table. Please scan the QR code at your table again.");
             return;
          }
 
