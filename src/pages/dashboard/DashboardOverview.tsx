@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { TrendingUp, Users, ShoppingBag, Utensils, IndianRupee, MapPin, FileDown, CheckCircle2, ChevronDown, AlertCircle, Clock, ChefHat, Printer, XCircle } from "lucide-react";
@@ -68,19 +68,16 @@ export function DashboardOverview() {
     return () => unsubscribe();
   }, [selectedOutletId]);
 
-  // Compute stats based on selected date filter
-  const now = new Date();
-  const startOfToday = new Date().setHours(0, 0, 0, 0);
-  const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).setHours(0, 0, 0, 0);
 
-  const filteredOrders = orders.filter(o => {
+  // ── Memoized computations — only recalculate when orders or dateFilter change ──
+  const now = useMemo(() => new Date(), []);
+  const startOfToday    = useMemo(() => new Date().setHours(0, 0, 0, 0), []);
+  const startOfYesterday = useMemo(() => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).setHours(0, 0, 0, 0), [now]);
+
+  const filteredOrders = useMemo(() => orders.filter(o => {
     if (!o.createdAt) return false;
-    if (dateFilter === 'today') {
-      return o.createdAt >= startOfToday;
-    }
-    if (dateFilter === 'yesterday') {
-      return o.createdAt >= startOfYesterday && o.createdAt < startOfToday;
-    }
+    if (dateFilter === 'today')     return o.createdAt >= startOfToday;
+    if (dateFilter === 'yesterday') return o.createdAt >= startOfYesterday && o.createdAt < startOfToday;
     if (dateFilter === 'week') {
       const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).setHours(0, 0, 0, 0);
       return o.createdAt >= sevenDaysAgo;
@@ -90,86 +87,69 @@ export function DashboardOverview() {
       return o.createdAt >= startOfMonth;
     }
     return true;
-  });
+  }), [orders, dateFilter, startOfToday, startOfYesterday, now]);
 
-  const totalRevenue = filteredOrders
-    .filter(o => o.status === 'paid')
-    .reduce((sum, o) => sum + (o.total || 0), 0);
+  const totalRevenue = useMemo(() =>
+    filteredOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0)
+  , [filteredOrders]);
 
-  const activeOrders = orders.filter(o => o.status !== 'paid' && o.status !== 'delivered');
-  const occupiedTablesCount = new Set(activeOrders.map(o => o.tableId)).size;
-  const occupancyRate = Math.min(100, Math.round((occupiedTablesCount / tableCount) * 100));
+  const activeOrders = useMemo(() =>
+    orders.filter(o => o.status !== 'paid' && o.status !== 'delivered')
+  , [orders]);
 
-  const paidOrders = filteredOrders.filter(o => o.status === 'paid');
+  const occupiedTablesCount = useMemo(() => new Set(activeOrders.map(o => o.tableId)).size, [activeOrders]);
+  const occupancyRate = useMemo(() => Math.min(100, Math.round((occupiedTablesCount / tableCount) * 100)), [occupiedTablesCount, tableCount]);
+
+  const paidOrders = useMemo(() => filteredOrders.filter(o => o.status === 'paid'), [filteredOrders]);
   const avgTurnaround = paidOrders.length > 0 ? "26 min" : "32 min";
 
   // Manager specific computed metrics
-  const preparingOrders = activeOrders.filter(o => o.status === 'preparing');
-  const readyOrders = activeOrders.filter(o => o.status === 'ready');
-  const staleTables = activeOrders.filter(o => {
-    return o.tableNumber && o.status !== 'paid' && (Date.now() - o.createdAt) > 45 * 60 * 1000;
-  });
+  const preparingOrders = useMemo(() => activeOrders.filter(o => o.status === 'preparing'), [activeOrders]);
+  const readyOrders     = useMemo(() => activeOrders.filter(o => o.status === 'ready'), [activeOrders]);
+  const staleTables     = useMemo(() => activeOrders.filter(o =>
+    o.tableNumber && o.status !== 'paid' && (Date.now() - o.createdAt) > 45 * 60 * 1000
+  ), [activeOrders]);
 
-  // Build chart data based on selected filter
-  let finalChartData = [];
-  
-  if (dateFilter === 'today' || dateFilter === 'yesterday') {
-    const baseTime = dateFilter === 'today' ? startOfToday : startOfYesterday;
-    finalChartData = Array.from({ length: 6 }).map((_, i) => {
-      const hourStart = baseTime + i * 4 * 60 * 60 * 1000; // 4 hour chunks
-      const hourEnd = hourStart + 4 * 60 * 60 * 1000;
-      const label = `${new Date(hourStart).getHours()}:00`;
-      const chunkOrders = orders.filter(o => o.createdAt >= hourStart && o.createdAt < hourEnd);
-      const rev = chunkOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
-      return { name: label, revenue: rev, orders: chunkOrders.length };
-    });
-  } else {
-    // Week or Month
-    const daysCount = dateFilter === 'week' ? 7 : 30;
-    const lastNDays = Array.from({ length: daysCount }).map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (daysCount - 1 - i));
-      return d;
-    });
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const chartData = lastNDays.map(date => {
-      const dayName = dateFilter === 'week' ? daysOfWeek[date.getDay()] : `${date.getDate()} ${daysOfWeek[date.getDay()]}`;
-      const dateStr = date.toDateString();
-      const dayOrders = orders.filter(o => {
-        const oDate = new Date(o.createdAt);
-        return oDate.toDateString() === dateStr;
-      });
-      const revenue = dayOrders
-        .filter(o => o.status === 'paid')
-        .reduce((sum, o) => sum + (o.total || 0), 0);
-      return {
-        name: dayName,
-        revenue: revenue,
-        orders: dayOrders.length
-      };
-    });
-    
-    const hasRevenue = chartData.some(d => d.revenue > 0);
-    finalChartData = chartData;
-  }
-
-  // Compute Category Sales for Donut Chart
-  const categorySalesTally: { [category: string]: number } = {};
-  filteredOrders.forEach(order => {
-    if (order.status === 'paid' && Array.isArray(order.items)) {
-      order.items.forEach((item: any) => {
-        const cat = item.category || 'Other';
-        const qty = item.quantity || 1;
-        const price = item.price || 0;
-        if (!categorySalesTally[cat]) categorySalesTally[cat] = 0;
-        categorySalesTally[cat] += (price * qty);
+  // Build chart data based on selected filter — O(N*days) memoized
+  const finalChartData = useMemo(() => {
+    if (dateFilter === 'today' || dateFilter === 'yesterday') {
+      const baseTime = dateFilter === 'today' ? startOfToday : startOfYesterday;
+      return Array.from({ length: 6 }).map((_, i) => {
+        const hourStart = baseTime + i * 4 * 60 * 60 * 1000;
+        const hourEnd   = hourStart + 4 * 60 * 60 * 1000;
+        const label = `${new Date(hourStart).getHours()}:00`;
+        const chunkOrders = orders.filter(o => o.createdAt >= hourStart && o.createdAt < hourEnd);
+        const rev = chunkOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
+        return { name: label, revenue: rev, orders: chunkOrders.length };
       });
     }
-  });
+    const daysCount = dateFilter === 'week' ? 7 : 30;
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return Array.from({ length: daysCount }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (daysCount - 1 - i));
+      const dayName  = dateFilter === 'week' ? daysOfWeek[d.getDay()] : `${d.getDate()} ${daysOfWeek[d.getDay()]}`;
+      const dateStr  = d.toDateString();
+      const dayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === dateStr);
+      const revenue   = dayOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
+      return { name: dayName, revenue, orders: dayOrders.length };
+    });
+  }, [orders, dateFilter, startOfToday, startOfYesterday]);
 
-  const categorySales = Object.entries(categorySalesTally)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
+  // Compute Category Sales for Donut Chart — O(N*items) memoized
+  const categorySales = useMemo(() => {
+    const tally: { [cat: string]: number } = {};
+    filteredOrders.forEach(order => {
+      if (order.status === 'paid' && Array.isArray(order.items)) {
+        order.items.forEach((item: any) => {
+          const cat = item.category || 'Other';
+          if (!tally[cat]) tally[cat] = 0;
+          tally[cat] += (item.price || 0) * (item.quantity || 1);
+        });
+      }
+    });
+    return Object.entries(tally).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filteredOrders]);
 
   const PIE_COLORS = ['#f97316', '#8b5cf6', '#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#64748b'];
 
@@ -209,29 +189,24 @@ export function DashboardOverview() {
     return null;
   };
 
-  // Tally best selling dishes dynamically
-  const bestSellersTally: { [name: string]: { qty: number; total: number } } = {};
-  filteredOrders.forEach(order => {
-    if (order.status === 'paid' && Array.isArray(order.items)) {
-      order.items.forEach((item: any) => {
-        const name = item.name;
-        const qty = item.quantity || 1;
-        const price = item.price || 0;
-        if (!bestSellersTally[name]) {
-          bestSellersTally[name] = { qty: 0, total: 0 };
-        }
-        bestSellersTally[name].qty += qty;
-        bestSellersTally[name].total += (price * qty);
-      });
-    }
-  });
-
-  const bestSellers = Object.entries(bestSellersTally)
-    .map(([name, data]) => ({ name, ...data }))
-    .sort((a, b) => b.qty - a.qty)
-    .slice(0, 5);
-
-  const finalBestSellers = bestSellers;
+  // Tally best selling dishes — O(N*items) memoized
+  const finalBestSellers = useMemo(() => {
+    const tally: { [name: string]: { qty: number; total: number } } = {};
+    filteredOrders.forEach(order => {
+      if (order.status === 'paid' && Array.isArray(order.items)) {
+        order.items.forEach((item: any) => {
+          const name = item.name;
+          if (!tally[name]) tally[name] = { qty: 0, total: 0 };
+          tally[name].qty   += item.quantity || 1;
+          tally[name].total += (item.price || 0) * (item.quantity || 1);
+        });
+      }
+    });
+    return Object.entries(tally)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 5);
+  }, [filteredOrders]);
 
   // Security Audit Logs
   const [securityLogs, setSecurityLogs] = useState<any[]>([]);

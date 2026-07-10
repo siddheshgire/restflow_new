@@ -139,6 +139,21 @@ export function KitchenDisplay() {
     return () => unsubscribe();
   }, [outletId, isMuted, isAuthenticated]);
 
+  // Auto-clamp currentPage when orders reduce (e.g. all page-2 tickets get completed)
+  // Prevents waiter seeing a blank page after their page's tickets are cleared
+  useEffect(() => {
+    const filteredCount = orders.filter(order => {
+      if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
+        return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
+      }
+      return true;
+    }).length;
+    const maxPage = Math.max(1, Math.ceil(filteredCount / 12));
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [orders]);
+
   const updateStatus = async (orderId: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'pending' ? 'preparing' : 'ready';
     await updateDoc(doc(db, "orders", orderId), { status: nextStatus });
