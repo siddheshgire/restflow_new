@@ -178,7 +178,7 @@ export function WaiterDashboard() {
     const q = query(
        collection(db, "orders"), 
        where("outletId", "==", selectedOutletId),
-       where("status", "in", ["pending", "preparing", "ready", "delivered"])
+       where("status", "in", ["pending", "preparing", "ready", "out-for-delivery", "delivered"])
     );
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -221,21 +221,46 @@ export function WaiterDashboard() {
     await updateDoc(doc(db, "orders", orderId), { waiterName });
   };
 
+  const claimDelivery = async (orderId: string) => {
+    if (!waiterName) return;
+    await updateDoc(doc(db, "orders", orderId), { deliveryRider: waiterName });
+  };
+
+  const startDelivery = async (orderId: string) => {
+    await updateDoc(doc(db, "orders", orderId), { status: 'out-for-delivery' });
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-zinc-50 flex items-center justify-center text-zinc-400">Loading Dashboard...</div>;
   }
 
-  // Filter active orders based on role and waiter assignment
+  // Filter active orders based on role, type, and staff assignment
   const activeOrders = orders.filter(o => {
-
-    // Owners and managers can view all active table sessions
+    // Owners and managers can view all active orders
     if (role === 'owner' || role === 'manager') return true;
 
-    // Waiters only see their assigned tables or unassigned tables
-    const assignedName = o.waiterName || "Unassigned";
-    const matchesWaiter = assignedName.toLowerCase().trim() === waiterName.toLowerCase().trim();
-    const isUnassigned = assignedName === "Unassigned";
-    return matchesWaiter || isUnassigned;
+    // Dine-In orders
+    if (!o.orderType || o.orderType === 'dine-in') {
+      const assignedName = o.waiterName || "Unassigned";
+      const matchesWaiter = assignedName.toLowerCase().trim() === waiterName.toLowerCase().trim();
+      const isUnassigned = assignedName === "Unassigned";
+      return matchesWaiter || isUnassigned;
+    }
+
+    // Delivery orders
+    if (o.orderType === 'delivery') {
+      const assignedRider = o.deliveryRider || "Unassigned";
+      const matchesRider = assignedRider.toLowerCase().trim() === waiterName.toLowerCase().trim();
+      const isUnassigned = assignedRider === "Unassigned";
+      return matchesRider || isUnassigned;
+    }
+
+    // Takeaway orders (visible to all staff to handle checkout)
+    if (o.orderType === 'takeaway') {
+      return true;
+    }
+
+    return false;
   });
 
   return (
@@ -273,35 +298,60 @@ export function WaiterDashboard() {
       )}
       <div className="flex justify-between items-center mb-8 pb-6 border-b border-zinc-200">
         <div>
-           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Active Tables</h2>
-           <p className="text-zinc-500 text-sm mt-1">Manage orders and payments</p>
+           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Active Workboard</h2>
+           <p className="text-zinc-500 text-sm mt-1">Manage dine-in tables, takeaway collections, and deliveries</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activeOrders.map((order) => (
-           <div key={order.id} className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm flex flex-col">
-              <div className="flex justify-between items-start mb-4">
-                 <div>
-                    <h3 className="text-xl font-bold text-zinc-900">Table {order.tableId}</h3>
-                    <p className="text-xs text-zinc-500 mt-1">{formatDistanceToNow(order.createdAt, { addSuffix: true })}</p>
+           <div key={order.id} className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                 <div className="flex justify-between items-start mb-4">
+                    <div>
+                       {order.orderType === 'takeaway' ? (
+                          <h3 className="text-xl font-bold text-zinc-900">Takeaway 🛍️</h3>
+                       ) : order.orderType === 'delivery' ? (
+                          <h3 className="text-xl font-bold text-zinc-900">Delivery 🛵</h3>
+                       ) : (
+                          <h3 className="text-xl font-bold text-zinc-900">Table {order.tableId}</h3>
+                       )}
+                       <p className="text-xs text-zinc-500 mt-1">{formatDistanceToNow(order.createdAt, { addSuffix: true })}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                          order.status === 'pending' ? 'bg-orange-100 text-orange-800' : 
+                          order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'ready' ? 'bg-emerald-100 text-emerald-800' :
+                          order.status === 'out-for-delivery' ? 'bg-purple-100 text-purple-800' :
+                          'bg-zinc-100 text-zinc-800'
+                       }`}>
+                          {order.status}
+                       </span>
+                       <button onClick={() => cancelOrder(order.id)} className="p-1 text-zinc-400 hover:text-red-600 transition-colors cursor-pointer rounded bg-zinc-50 border border-transparent hover:border-red-100" title="Cancel Order">
+                          <X className="w-4 h-4" />
+                       </button>
+                    </div>
                  </div>
-                 <div className="flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                       order.status === 'pending' ? 'bg-orange-100 text-orange-800' : 
-                       order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
-                       order.status === 'ready' ? 'bg-emerald-100 text-emerald-800' :
-                       'bg-zinc-100 text-zinc-800'
-                    }`}>
-                       {order.status}
-                    </span>
-                    <button onClick={() => cancelOrder(order.id)} className="p-1 text-zinc-400 hover:text-red-600 transition-colors cursor-pointer rounded bg-zinc-50 border border-transparent hover:border-red-100" title="Cancel Order">
-                       <X className="w-4 h-4" />
-                    </button>
-                 </div>
-              </div>
-              
-              <div className="flex-1">
+
+                 {/* Customer Delivery info */}
+                 {order.orderType === 'delivery' && (
+                    <div className="text-xs text-zinc-650 bg-zinc-50 border border-zinc-100 p-3 rounded-xl mb-4 space-y-1">
+                       <p className="font-bold text-zinc-400 uppercase tracking-wide text-[9px]">Deliver To:</p>
+                       <p className="font-bold text-zinc-800">{order.customerName}</p>
+                       <p className="font-medium">{order.customerPhone}</p>
+                       <p className="text-zinc-600 italic font-medium">{order.deliveryAddress}</p>
+                    </div>
+                 )}
+
+                 {order.orderType === 'takeaway' && (
+                    <div className="text-xs text-zinc-650 bg-zinc-50 border border-zinc-100 p-3 rounded-xl mb-4 space-y-0.5">
+                       <p className="font-bold text-zinc-400 uppercase tracking-wide text-[9px]">Guest:</p>
+                       <p className="font-bold text-zinc-800">{order.customerName || "Walk-in"}</p>
+                       <p className="font-medium">{order.customerPhone || "No Phone"}</p>
+                    </div>
+                 )}
+                 
                  <ul className="space-y-2 mb-4">
                     {order.items
                        .filter((item: any) => item.menuItemId !== "starter-occupy")
@@ -318,26 +368,69 @@ export function WaiterDashboard() {
                  </div>
               </div>
 
-               <div className="mt-6 space-y-3 border-t border-zinc-100 pt-4">
-                  {(order.waiterName === "Unassigned" || !order.waiterName) && (
-                     <button 
-                       onClick={() => claimTable(order.id)} 
-                       className="w-full py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                     >
-                       <Utensils className="w-4 h-4" /> Claim Table & Assist
-                     </button>
-                  )}
-                  {order.status === 'ready' && (
-                    <button onClick={() => markDelivered(order.id)} className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
-                       <CheckCircle2 className="w-4 h-4" /> Mark Delivered
-                    </button>
+              <div className="mt-6 space-y-3 border-t border-zinc-100 pt-4">
+                 {/* Dine-In Buttons */}
+                 {(!order.orderType || order.orderType === 'dine-in') && (
+                    <>
+                       {(order.waiterName === "Unassigned" || !order.waiterName) && (
+                          <button 
+                            onClick={() => claimTable(order.id)} 
+                            className="w-full py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Utensils className="w-4 h-4" /> Claim Table & Assist
+                          </button>
+                       )}
+                       {order.status === 'ready' && (
+                         <button onClick={() => markDelivered(order.id)} className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
+                            <CheckCircle2 className="w-4 h-4" /> Mark Served
+                         </button>
+                      )}
+                      {order.status === 'delivered' && (
+                         <div className="grid grid-cols-3 gap-2">
+                            <button onClick={() => markPaid(order.id, 'cash')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Cash</button>
+                            <button onClick={() => markPaid(order.id, 'card')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Card</button>
+                            <button onClick={() => markPaid(order.id, 'upi')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">UPI</button>
+                         </div>
+                      )}
+                    </>
                  )}
-                 {order.status === 'delivered' && (
+
+                 {/* Takeaway Buttons */}
+                 {order.orderType === 'takeaway' && order.status === 'ready' && (
                     <div className="grid grid-cols-3 gap-2">
                        <button onClick={() => markPaid(order.id, 'cash')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Cash</button>
                        <button onClick={() => markPaid(order.id, 'card')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Card</button>
                        <button onClick={() => markPaid(order.id, 'upi')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">UPI</button>
                     </div>
+                 )}
+
+                 {/* Delivery Buttons */}
+                 {order.orderType === 'delivery' && (
+                    <>
+                       {(!order.deliveryRider || order.deliveryRider === 'Unassigned') && (
+                          <button
+                            onClick={() => claimDelivery(order.id)}
+                            className="w-full py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                             Claim Delivery 🛵
+                          </button>
+                       )}
+                       {order.deliveryRider && order.deliveryRider !== 'Unassigned' && order.status === 'ready' && (
+                          <button
+                            onClick={() => startDelivery(order.id)}
+                            className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                             Start Delivery Route
+                          </button>
+                       )}
+                       {order.status === 'out-for-delivery' && (
+                          <div className="grid grid-cols-3 gap-2">
+                             <button onClick={() => markPaid(order.id, 'cash')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Cash</button>
+                             <button onClick={() => markPaid(order.id, 'card')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Card</button>
+                             <button onClick={() => markPaid(order.id, 'upi')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">UPI</button>
+                          </div>
+                       )}
+                    </>
                  )}
               </div>
            </div>
@@ -345,7 +438,7 @@ export function WaiterDashboard() {
         {activeOrders.length === 0 && (
            <div className="col-span-full py-12 text-center text-zinc-500">
               <Utensils className="w-8 h-8 mx-auto mb-3 opacity-20" />
-              <p>No active tables currently.</p>
+              <p>No active orders currently.</p>
            </div>
         )}
       </div>

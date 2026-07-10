@@ -3,7 +3,7 @@ import { collection, onSnapshot, query, where, updateDoc, doc, addDoc, deleteDoc
 import { db } from "../../lib/firebase";
 import { Order } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
-import { Utensils, CheckCircle2, User, HelpCircle, XCircle, Users, ChevronDown, Printer } from "lucide-react";
+import { Utensils, CheckCircle2, User, HelpCircle, XCircle, Users, ChevronDown, Printer, Plus, Minus, ShoppingBag, Truck, ClipboardList, Trash2 as TrashIcon } from "lucide-react";
 
 interface Employee {
   id: string;
@@ -17,6 +17,16 @@ export function TableServiceConsole() {
   const [staff, setStaff] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableCount, setTableCount] = useState(12);
+
+  // New Delivery / Takeaway states
+  const [activeTab, setActiveTab] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [isCustomOrderOpen, setIsCustomOrderOpen] = useState(false);
+  const [customOrderType, setCustomOrderType] = useState<'takeaway' | 'delivery'>('takeaway');
+  const [custName, setCustName] = useState("");
+  const [custPhone, setCustPhone] = useState("");
+  const [deliveryAddr, setDeliveryAddr] = useState("");
+  const [customQuantities, setCustomQuantities] = useState<Record<string, number>>({});
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,15 +81,16 @@ export function TableServiceConsole() {
     if (!selectedOutletId) {
       setOrders([]);
       setStaff([]);
+      setMenuItems([]);
       setLoading(false);
       return;
     }
 
-    // Subscribe to active orders (server-side filtered)
+    // Subscribe to active orders (server-side filtered to include delivery and takeaway states)
     const ordersQuery = query(
       collection(db, "orders"),
       where("outletId", "==", selectedOutletId),
-      where("status", "in", ["pending", "preparing", "ready", "delivered"])
+      where("status", "in", ["pending", "preparing", "ready", "out-for-delivery", "delivered"])
     );
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
@@ -106,11 +117,92 @@ export function TableServiceConsole() {
       setStaff(fetched.filter(s => s.role === 'waiter'));
     });
 
+    // Subscribe to menu items
+    const menuQuery = query(
+      collection(db, "menu_items"),
+      where("outletId", "==", selectedOutletId),
+      where("available", "==", true)
+    );
+
+    const unsubscribeMenu = onSnapshot(menuQuery, (snapshot) => {
+      const fetched = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setMenuItems(fetched);
+    });
+
     return () => {
       unsubscribeOrders();
       unsubscribeStaff();
+      unsubscribeMenu();
     };
   }, [selectedOutletId]);
+
+  const handleCreateCustomOrder = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedOutletId || !custName || !custPhone) return;
+    if (customOrderType === 'delivery' && !deliveryAddr) return;
+
+    const selectedItems = Object.entries(customQuantities)
+      .filter(([_, qty]) => qty > 0)
+      .map(([itemId, qty]) => {
+        const item = menuItems.find(m => m.id === itemId);
+        return {
+          menuItemId: itemId,
+          quantity: qty,
+          price: item?.price || 0,
+          name: item?.name || "Unknown Item"
+        };
+      });
+
+    if (selectedItems.length === 0) {
+      alert("Please select at least one item.");
+      return;
+    }
+
+    const subtotal = selectedItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+    const cgst = subtotal * 0.025;
+    const sgst = subtotal * 0.025;
+    const total = subtotal + cgst + sgst;
+
+    try {
+      await addDoc(collection(db, "orders"), {
+        outletId: selectedOutletId,
+        tableId: customOrderType === 'takeaway' ? 'Takeaway' : 'Delivery',
+        items: selectedItems,
+        status: 'pending',
+        total: total,
+        createdAt: Date.now(),
+        orderType: customOrderType,
+        customerName: custName,
+        customerPhone: custPhone,
+        deliveryAddress: customOrderType === 'delivery' ? deliveryAddr : '',
+        deliveryRider: 'Unassigned'
+      });
+
+      setIsCustomOrderOpen(false);
+      setCustName("");
+      setCustPhone("");
+      setDeliveryAddr("");
+      setCustomQuantities({});
+    } catch (err) {
+      console.error("Error creating custom order:", err);
+      alert("Failed to place order.");
+    }
+  };
+
+  const updateCustomOrderStatus = async (orderId: string, status: string, paymentMethod?: string) => {
+    const updates: any = { status };
+    if (paymentMethod) {
+      updates.paymentMethod = paymentMethod;
+    }
+    await updateDoc(doc(db, "orders", orderId), updates);
+  };
+
+  const assignRider = async (orderId: string, riderName: string) => {
+    await updateDoc(doc(db, "orders", orderId), { deliveryRider: riderName });
+  };
 
   // Operations
   const handleAssign = async (e: FormEvent) => {
@@ -216,176 +308,526 @@ export function TableServiceConsole() {
     <div className="space-y-6 max-w-6xl mx-auto font-sans pb-12">
       <div className="border-b border-zinc-200 pb-5 screen-only flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Table Service Console</h2>
-          <p className="text-zinc-500 text-sm mt-1 font-medium">Directly manage customer occupancy, change waiters, accept cash/card payments, and free dining tables.</p>
+          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Table & Order Console</h2>
+          <p className="text-zinc-500 text-sm mt-1 font-medium">Directly manage dining tables, takeaway orders, and home delivery dispatching.</p>
         </div>
-        {role === 'owner' && (
-          <div className="flex items-center gap-3 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm self-start md:self-auto">
-             <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Tables</span>
-             <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => adjustTableCount(-1)} 
-                  disabled={tableCount <= 1}
-                  className="w-7 h-7 border border-zinc-200 rounded-lg hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-                >-</button>
-                <span className="font-mono font-bold text-zinc-900 text-sm w-6 text-center">{tableCount}</span>
-                <button 
-                  onClick={() => adjustTableCount(1)}
-                  className="w-7 h-7 border border-zinc-200 rounded-lg hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer"
-                >+</button>
-             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Grid of Tables */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 screen-only">
-        {totalTablesList.map((tableId) => {
-          const tableOrders = orders.filter(o => o.tableId === tableId);
-          const isOccupied = tableOrders.length > 0;
-          const items = tableOrders.flatMap(o => o.items || []);
-          const totalAmount = tableOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-          
-          // Get waiter and guests info from first active order
-          const assignedWaiter = tableOrders[0]?.waiterName || "Unassigned";
-          const guests = tableOrders[0]?.guests || 2;
-          
-          // Get overall status (prioritize pending > preparing > ready > delivered)
-          let tableStatus = "Vacant";
-          if (isOccupied) {
-            const statuses = tableOrders.map(o => o.status);
-            if (statuses.includes("pending")) tableStatus = "Pending Orders";
-            else if (statuses.includes("preparing")) tableStatus = "Preparing Food";
-            else if (statuses.includes("ready")) tableStatus = "Food Ready";
-            else tableStatus = "Served / Dining";
-          }
-
-          return (
-            <div
-              key={tableId}
-              className={`rounded-xl border p-5 flex flex-col justify-between shadow-sm transition-all duration-200 ${
-                isOccupied
-                  ? tableStatus === "Food Ready"
-                    ? "border-emerald-500 bg-emerald-50/30"
-                    : tableStatus === "Preparing Food"
-                    ? "border-blue-500 bg-blue-50/20"
-                    : "border-orange-500 bg-orange-50/20"
-                  : "border-zinc-200 bg-white hover:border-zinc-300"
+        
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          {/* Active Tab Selectors */}
+          <div className="flex border border-zinc-200 rounded-xl bg-zinc-50 p-1 shadow-sm">
+            <button
+              onClick={() => setActiveTab('dine-in')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'dine-in' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              <div>
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-zinc-950">Table {tableId}</h3>
-                    <p className={`text-xs font-semibold uppercase mt-0.5 tracking-wider ${
-                      isOccupied 
-                        ? tableStatus === "Food Ready"
-                          ? "text-emerald-700"
-                          : tableStatus === "Preparing Food"
-                          ? "text-blue-700"
-                          : "text-orange-700"
-                        : "text-zinc-400"
-                    }`}>
-                      {tableStatus}
-                    </p>
+              <Utensils className="w-3.5 h-3.5" /> Dine-In
+            </button>
+            <button
+              onClick={() => setActiveTab('takeaway')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'takeaway' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" /> Takeaway
+            </button>
+            <button
+              onClick={() => setActiveTab('delivery')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'delivery' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" /> Delivery
+            </button>
+          </div>
+
+          {activeTab !== 'dine-in' && (
+            <button
+              onClick={() => {
+                setIsCustomOrderOpen(true);
+                setCustomOrderType(activeTab as any);
+              }}
+              className="flex items-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-orange-500 transition-all cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" /> Create Order
+            </button>
+          )}
+
+          {activeTab === 'dine-in' && role === 'owner' && (
+            <div className="flex items-center gap-3 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm">
+               <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Tables</span>
+               <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => adjustTableCount(-1)} 
+                    disabled={tableCount <= 1}
+                    className="w-7 h-7 border border-zinc-200 rounded-lg hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                  >-</button>
+                  <span className="font-mono font-bold text-zinc-900 text-sm w-6 text-center">{tableCount}</span>
+                  <button 
+                    onClick={() => adjustTableCount(1)}
+                    className="w-7 h-7 border border-zinc-200 rounded-lg hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer"
+                  >+</button>
+               </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dine-In Grid */}
+      {activeTab === 'dine-in' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 screen-only">
+          {totalTablesList.map((tableId) => {
+            const tableOrders = orders.filter(o => o.tableId === tableId);
+            const isOccupied = tableOrders.length > 0;
+            const items = tableOrders.flatMap(o => o.items || []);
+            const totalAmount = tableOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+            
+            const assignedWaiter = tableOrders[0]?.waiterName || "Unassigned";
+            const guests = tableOrders[0]?.guests || 2;
+            
+            let tableStatus = "Vacant";
+            if (isOccupied) {
+              const statuses = tableOrders.map(o => o.status);
+              if (statuses.includes("pending")) tableStatus = "Pending Orders";
+              else if (statuses.includes("preparing")) tableStatus = "Preparing Food";
+              else if (statuses.includes("ready")) tableStatus = "Food Ready";
+              else tableStatus = "Served / Dining";
+            }
+
+            return (
+              <div
+                key={tableId}
+                className={`rounded-xl border p-5 flex flex-col justify-between shadow-sm transition-all duration-205 ${
+                  isOccupied
+                    ? tableStatus === "Food Ready"
+                      ? "border-emerald-500 bg-emerald-50/30"
+                      : tableStatus === "Preparing Food"
+                      ? "border-blue-500 bg-blue-50/20"
+                      : "border-orange-500 bg-orange-50/20"
+                    : "border-zinc-200 bg-white hover:border-zinc-300"
+                }`}
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-zinc-950">Table {tableId}</h3>
+                      <p className={`text-xs font-semibold uppercase mt-0.5 tracking-wider ${
+                        isOccupied 
+                          ? tableStatus === "Food Ready"
+                            ? "text-emerald-700"
+                            : tableStatus === "Preparing Food"
+                            ? "text-blue-700"
+                            : "text-orange-700"
+                          : "text-zinc-400"
+                      }`}>
+                        {tableStatus}
+                      </p>
+                    </div>
+                    <span className={`h-2 w-2 rounded-full ${isOccupied ? "bg-orange-500" : "bg-emerald-500"}`} />
                   </div>
-                  <span className={`h-2 w-2 rounded-full ${isOccupied ? "bg-orange-500" : "bg-emerald-500"}`} />
+
+                  {isOccupied ? (
+                    <div className="space-y-3 mt-4">
+                      <div className="text-xs text-zinc-600 flex items-center justify-between font-medium">
+                        <span 
+                          onClick={() => openAssignModal(tableId)} 
+                          className="flex items-center gap-1 text-orange-600 hover:text-orange-700 cursor-pointer font-bold hover:underline"
+                          title="Change or assign waiter"
+                        >
+                          <User className="w-3.5 h-3.5 text-zinc-500" /> {assignedWaiter}
+                        </span>
+                        <span 
+                          onClick={() => openAssignModal(tableId)} 
+                          className="flex items-center gap-1 text-zinc-600 hover:text-orange-600 cursor-pointer font-semibold hover:underline"
+                          title="Edit guest count"
+                        >
+                          <Users className="w-3.5 h-3.5" /> {guests} Guests
+                        </span>
+                      </div>
+
+                      <div className="border-t border-zinc-200/60 pt-3">
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Active Order Items</p>
+                        <div className="max-h-24 overflow-y-auto space-y-1 pr-1 text-xs">
+                          {items
+                            .filter(item => item.menuItemId !== "starter-occupy")
+                            .map((item, idx) => (
+                              <div key={idx} className="flex justify-between font-medium text-zinc-800">
+                                <span>{item.quantity}x {item.name}</span>
+                                <span className="text-zinc-900">₹{item.price * item.quantity}</span>
+                              </div>
+                            ))}
+                          {items.filter(item => item.menuItemId !== "starter-occupy").length === 0 && (
+                            <p className="text-zinc-400 italic">No food items added yet.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-zinc-400 text-sm mt-4 italic">Ready to receive customers.</p>
+                  )}
                 </div>
 
-                {isOccupied ? (
-                  <div className="space-y-3 mt-4">
-                    <div className="text-xs text-zinc-600 flex items-center justify-between font-medium">
-                      <span 
-                        onClick={() => openAssignModal(tableId)} 
-                        className="flex items-center gap-1 text-orange-600 hover:text-orange-700 cursor-pointer font-bold hover:underline"
-                        title="Change or assign waiter"
+                <div className="mt-6 border-t border-zinc-200/60 pt-4 space-y-2">
+                  {isOccupied ? (
+                    <>
+                      <div className="flex justify-between items-center font-bold text-sm text-zinc-950 mb-3">
+                        <span>Total Value:</span>
+                        <span className="text-base text-orange-600">₹{totalAmount.toLocaleString()}</span>
+                      </div>
+                      <button
+                        onClick={() => setBillTableId(tableId)}
+                        className="w-full py-1.5 border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 mb-2 shadow-sm"
                       >
-                        <User className="w-3.5 h-3.5 text-zinc-500" /> {assignedWaiter}
-                      </span>
-                      <span 
-                        onClick={() => openAssignModal(tableId)} 
-                        className="flex items-center gap-1 text-zinc-600 hover:text-orange-600 cursor-pointer font-semibold hover:underline"
-                        title="Edit guest count"
+                        <Printer className="w-3.5 h-3.5" /> Print Bill
+                      </button>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <button
+                          onClick={() => handleCheckout(tableId, "cash")}
+                          className="py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
+                        >
+                          Cash
+                        </button>
+                        <button
+                          onClick={() => handleCheckout(tableId, "upi")}
+                          className="py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
+                        >
+                          UPI
+                        </button>
+                        <button
+                          onClick={() => handleCheckout(tableId, "card")}
+                          className="py-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
+                        >
+                          Card
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => confirmClearTable(tableId)}
+                        className="w-full mt-1 py-1.5 border border-dashed border-red-200 hover:bg-red-50 text-red-600 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
                       >
-                        <Users className="w-3.5 h-3.5" /> {guests} Guests
+                        <XCircle className="w-3.5 h-3.5" /> Force Free Table
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => openAssignModal(tableId)}
+                      className="w-full py-2 border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-600 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Utensils className="w-4 h-4" /> Assign Table & Waiter
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Takeaway Orders List */}
+      {activeTab === 'takeaway' && (
+        <div className="space-y-4">
+          {orders.filter(o => o.orderType === 'takeaway' || o.tableId === 'Takeaway').length === 0 ? (
+            <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl bg-white text-zinc-500">
+              <ShoppingBag className="w-10 h-10 mx-auto text-zinc-300 mb-3" />
+              <p className="font-semibold text-sm">No active takeaway orders found.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {orders
+                .filter(o => o.orderType === 'takeaway' || o.tableId === 'Takeaway')
+                .map((order) => (
+                  <div key={order.id} className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-zinc-900 text-base">{order.customerName || "Walk-in Guest"}</h4>
+                        <p className="text-xs text-zinc-500 font-mono mt-0.5">{order.customerPhone || "No Phone"}</p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${
+                        order.status === 'ready'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : order.status === 'preparing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {order.status}
                       </span>
                     </div>
 
-                    <div className="border-t border-zinc-200/60 pt-3">
-                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Active Order Items</p>
-                      <div className="max-h-24 overflow-y-auto space-y-1 pr-1 text-xs">
-                        {items
-                          .filter(item => item.menuItemId !== "starter-occupy")
-                          .map((item, idx) => (
-                            <div key={idx} className="flex justify-between font-medium text-zinc-800">
-                              <span>{item.quantity}x {item.name}</span>
-                              <span className="text-zinc-900">₹{item.price * item.quantity}</span>
-                            </div>
-                          ))}
-                        {items.filter(item => item.menuItemId !== "starter-occupy").length === 0 && (
-                          <p className="text-zinc-400 italic">No food items added yet.</p>
+                    <div className="border-t border-zinc-100 pt-3">
+                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Order Items</p>
+                      <div className="space-y-1.5">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-xs font-medium text-zinc-800">
+                            <span>{item.quantity}x {item.name}</span>
+                            <span>₹{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-zinc-100 pt-3 flex justify-between items-center font-bold text-sm text-zinc-950">
+                      <span>Total (Incl. Tax):</span>
+                      <span className="text-orange-600 text-base">₹{order.total.toLocaleString()}</span>
+                    </div>
+
+                    {order.status === 'ready' && (
+                      <div className="grid grid-cols-3 gap-2 pt-2">
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'cash')}
+                          className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid Cash
+                        </button>
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'upi')}
+                          className="py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid UPI
+                        </button>
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'card')}
+                          className="py-2 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid Card
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Delivery Orders List */}
+      {activeTab === 'delivery' && (
+        <div className="space-y-4">
+          {orders.filter(o => o.orderType === 'delivery' || o.tableId === 'Delivery').length === 0 ? (
+            <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl bg-white text-zinc-500">
+              <Truck className="w-10 h-10 mx-auto text-zinc-300 mb-3" />
+              <p className="font-semibold text-sm">No active delivery orders found.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {orders
+                .filter(o => o.orderType === 'delivery' || o.tableId === 'Delivery')
+                .map((order) => (
+                  <div key={order.id} className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-zinc-900 text-base">{order.customerName}</h4>
+                        <p className="text-xs text-zinc-500 font-mono mt-0.5">{order.customerPhone}</p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${
+                        order.status === 'out-for-delivery'
+                          ? 'bg-purple-100 text-purple-800'
+                          : order.status === 'ready'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : order.status === 'preparing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-zinc-600 bg-zinc-50 p-2.5 border border-zinc-150 rounded-xl">
+                      <p className="font-bold text-zinc-400 uppercase tracking-wide mb-1 text-[10px]">Delivery Address</p>
+                      <p className="font-medium text-zinc-800">{order.deliveryAddress}</p>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs border-t border-zinc-100 pt-3">
+                      <span className="font-bold text-zinc-500">Delivery Rider:</span>
+                      <div className="flex items-center gap-2">
+                        {order.deliveryRider && order.deliveryRider !== 'Unassigned' ? (
+                          <span className="font-semibold text-zinc-800 flex items-center gap-1">
+                            <User className="w-3.5 h-3.5 text-zinc-500" /> {order.deliveryRider}
+                          </span>
+                        ) : (
+                          <select
+                            onChange={(e) => assignRider(order.id, e.target.value)}
+                            defaultValue=""
+                            className="px-2.5 py-1 border border-zinc-200 bg-white rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          >
+                            <option value="" disabled>Assign Waiter</option>
+                            {staff.map(s => (
+                              <option key={s.id} value={s.name}>{s.name}</option>
+                            ))}
+                          </select>
                         )}
                       </div>
                     </div>
+
+                    <div className="border-t border-zinc-100 pt-3">
+                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Order Items</p>
+                      <div className="space-y-1.5">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-xs font-medium text-zinc-800">
+                            <span>{item.quantity}x {item.name}</span>
+                            <span>₹{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-zinc-100 pt-3 flex justify-between items-center font-bold text-sm text-zinc-950">
+                      <span>Total (Incl. Tax):</span>
+                      <span className="text-orange-600 text-base">₹{order.total.toLocaleString()}</span>
+                    </div>
+
+                    {order.status === 'ready' && (
+                      <button
+                        onClick={() => updateCustomOrderStatus(order.id, 'out-for-delivery')}
+                        className="w-full py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                      >
+                        Dispatch Order 🛵
+                      </button>
+                    )}
+
+                    {order.status === 'out-for-delivery' && (
+                      <div className="grid grid-cols-3 gap-2 pt-2">
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'cash')}
+                          className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid Cash
+                        </button>
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'upi')}
+                          className="py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid UPI
+                        </button>
+                        <button
+                          onClick={() => updateCustomOrderStatus(order.id, 'paid', 'card')}
+                          className="py-2 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                        >
+                          Paid Card
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-zinc-400 text-sm mt-4 italic">Ready to receive customers.</p>
-                )}
+                ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* New Custom Takeaway/Delivery Order Placement Modal */}
+      {isCustomOrderOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]">
+            <h3 className="text-lg font-bold text-zinc-950 capitalize mb-1">
+              Create New {customOrderType} Order
+            </h3>
+            <p className="text-zinc-500 text-xs mb-4">Provide customer info and select dishes to prepare.</p>
+
+            <form onSubmit={handleCreateCustomOrder} className="space-y-4 flex-1 overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Customer Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={custName}
+                    onChange={(e) => setCustName(e.target.value)}
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g. Rahul Sharma"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={custPhone}
+                    onChange={(e) => setCustPhone(e.target.value)}
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g. 9876543210"
+                  />
+                </div>
               </div>
 
-              <div className="mt-6 border-t border-zinc-200/60 pt-4 space-y-2">
-                {isOccupied ? (
-                  <>
-                    <div className="flex justify-between items-center font-bold text-sm text-zinc-950 mb-3">
-                      <span>Total Value:</span>
-                      <span className="text-base text-orange-600">₹{totalAmount.toLocaleString()}</span>
-                    </div>
-                    <button
-                      onClick={() => setBillTableId(tableId)}
-                      className="w-full py-1.5 border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 mb-2 shadow-sm"
-                    >
-                      <Printer className="w-3.5 h-3.5" /> Print Bill
-                    </button>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      <button
-                        onClick={() => handleCheckout(tableId, "cash")}
-                        className="py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
-                      >
-                        Cash
-                      </button>
-                      <button
-                        onClick={() => handleCheckout(tableId, "upi")}
-                        className="py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
-                      >
-                        UPI
-                      </button>
-                      <button
-                        onClick={() => handleCheckout(tableId, "card")}
-                        className="py-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center"
-                      >
-                        Card
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => confirmClearTable(tableId)}
-                      className="w-full mt-1 py-1.5 border border-dashed border-red-200 hover:bg-red-50 text-red-600 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
-                    >
-                      <XCircle className="w-3.5 h-3.5" /> Force Free Table
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => openAssignModal(tableId)}
-                    className="w-full py-2 border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 text-orange-600 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Utensils className="w-4 h-4" /> Assign Table & Waiter
-                  </button>
-                )}
+              {customOrderType === 'delivery' && (
+                <div>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Delivery Address</label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={deliveryAddr}
+                    onChange={(e) => setDeliveryAddr(e.target.value)}
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder="Enter complete customer address..."
+                  />
+                </div>
+              )}
+
+              {/* Menu items selection list */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Select Items</label>
+                <div className="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-56 overflow-y-auto p-1 bg-zinc-50">
+                  {menuItems.length === 0 ? (
+                    <p className="text-zinc-500 text-xs italic p-4 text-center">No available menu items.</p>
+                  ) : (
+                    menuItems.map((item) => {
+                      const qty = customQuantities[item.id] || 0;
+                      return (
+                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-lg my-1 shadow-sm">
+                          <div>
+                            <p className="text-xs font-bold text-zinc-900">{item.name}</p>
+                            <p className="text-[10px] text-zinc-500">₹{item.price}</p>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setCustomQuantities(prev => ({
+                                ...prev,
+                                [item.id]: Math.max(0, qty - 1)
+                              }))}
+                              className="w-6 h-6 rounded-lg border border-zinc-200 hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer"
+                            >
+                              -
+                            </button>
+                            <span className="text-xs font-bold text-zinc-900 w-4 text-center">{qty}</span>
+                            <button
+                              type="button"
+                              onClick={() => setCustomQuantities(prev => ({
+                                ...prev,
+                                [item.id]: qty + 1
+                              }))}
+                              className="w-6 h-6 rounded-lg border border-zinc-200 hover:bg-zinc-100 flex items-center justify-center font-bold text-zinc-650 cursor-pointer"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomOrderOpen(false);
+                    setCustomQuantities({});
+                  }}
+                  className="px-4 py-2 border border-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold hover:bg-zinc-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  Place Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Assign Waiter Modal */}
       {isModalOpen && (

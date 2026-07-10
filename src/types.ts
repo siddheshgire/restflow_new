@@ -29,17 +29,22 @@ export interface InventoryItem {
 export interface Order {
   id: string;
   outletId: string;
-  tableId: string;
+  tableId: string; // Remains empty or "Takeaway"/"Delivery" for off-premise orders
   items: Array<{
     menuItemId: string;
     quantity: number;
     price: number;
     name: string;
   }>;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'paid';
+  status: 'pending' | 'preparing' | 'ready' | 'out-for-delivery' | 'delivered' | 'paid' | 'cancelled';
   paymentMethod?: 'card' | 'cash' | 'upi';
   total: number;
   createdAt: number;
+  orderType?: 'dine-in' | 'takeaway' | 'delivery';
+  customerName?: string;
+  customerPhone?: string;
+  deliveryAddress?: string;
+  deliveryRider?: string;
 }
 
 export interface AttendanceItem {

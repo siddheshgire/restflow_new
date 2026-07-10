@@ -278,23 +278,41 @@ export function KitchenDisplay() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
         <AnimatePresence>
-          {orders.map((order) => (
-             <motion.div
-               key={order.id}
-               layout
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-               className={`rounded-xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-1000`}
-             >
+          {orders
+            .filter(order => {
+              if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
+                return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
+              }
+              return true;
+            })
+            .map((order) => (
+              <motion.div
+                key={order.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                className={`rounded-xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-1000`}
+              >
                 <div className="p-5">
                    <div className="flex justify-between items-start mb-4">
                       <div>
-                         <div className="text-3xl font-black tabular-nums tracking-tight">T-{order.tableId}</div>
+                         {order.orderType === 'takeaway' ? (
+                            <div className="text-xl font-black text-blue-400">Takeaway 🛍️</div>
+                         ) : order.orderType === 'delivery' ? (
+                            <div className="text-xl font-black text-purple-400">Delivery 🛵</div>
+                         ) : (
+                            <div className="text-3xl font-black tabular-nums tracking-tight">T-{order.tableId}</div>
+                         )}
                          <div className="flex items-center gap-1.5 text-zinc-400 text-sm mt-1">
                             <Clock className="w-4 h-4" />
                             {formatDistanceToNow(order.createdAt, { addSuffix: true })}
                          </div>
+                         {order.customerName && (
+                            <div className="text-xs font-semibold text-zinc-400 mt-2">
+                               Customer: {order.customerName}
+                            </div>
+                         )}
                       </div>
                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors duration-1000 ${getBadgeColorClass(order)}`}>
                          {order.status}
@@ -324,7 +342,7 @@ export function KitchenDisplay() {
                                     <span>{item.name}</span>
                                  </div>
                               </li>
-                           );
+                            );
                       })}
                    </ul>
                 </div>
@@ -346,11 +364,16 @@ export function KitchenDisplay() {
                       </button>
                    )}
                 </div>
-             </motion.div>
-          ))}
+              </motion.div>
+            ))}
         </AnimatePresence>
         
-        {orders.length === 0 && (
+        {orders.filter(order => {
+          if (order.orderType === 'takeaway' || order.orderType === 'delivery') {
+            return order.status !== 'ready' && order.status !== 'out-for-delivery' && order.status !== 'delivered' && order.status !== 'paid';
+          }
+          return true;
+        }).length === 0 && (
            <div className="col-span-full py-24 text-center text-zinc-500">
               <Utensils className="w-12 h-12 mx-auto mb-4 opacity-20" />
               <p className="text-xl font-medium tracking-tight">Kitchen is clear. Waiting for orders...</p>
