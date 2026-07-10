@@ -1,0 +1,2621 @@
+{
+  "users": {
+    "mock-demo-owner-uid": {
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "passwordHash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791",
+      "createdAt": 1783266459742,
+      "currentSessionToken": "22l4s0sah8c1783686456228"
+    },
+    "user-rahul-cravecraft-app": {
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "passwordHash": "687f6da20de59091e67f594827cdee268125feb3aed1c3bad77d0f6761eb198a",
+      "displayName": "rahul",
+      "createdAt": 1783334500050,
+      "currentSessionToken": "y5dzijpokes1783667503713"
+    },
+    "user-rohan-cravecraft-app": {
+      "email": "rohan@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "passwordHash": "9ebf60103a6b23931c8d4005b99244a80aeef8d61eed08e39392415548ba1641",
+      "displayName": "rohan",
+      "createdAt": 1783334532608
+    },
+    "mock-google-user-uid": {
+      "email": "google.user@example.com",
+      "role": "owner",
+      "isPaid": true,
+      "hasCompletedOnboarding": false,
+      "createdAt": 1783335925043
+    },
+    "user-aman-cravecraft-app": {
+      "email": "aman@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "passwordHash": "45f30b0da9ce2af048bea1987ecc2abd35fbee2c972f696c65e04e648239c0d8",
+      "displayName": "aman",
+      "createdAt": 1783408439384,
+      "currentSessionToken": "07vopzyxl9nu1783409943882"
+    },
+    "user-manager-cravecraft-app": {
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "displayName": "Manager Demo",
+      "createdAt": 1783496770307,
+      "currentSessionToken": "6j6uwk2m8ff1783670313943",
+      "passwordHash": "866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5"
+    },
+    "user-cook-cravecraft-app": {
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "isPaid": true,
+      "hasCompletedOnboarding": true,
+      "passwordHash": "ca51f29a25456be733c3e7c48861c5e5693fc9d45d51dd5167483adb572a0b7b",
+      "displayName": "Cook Demo",
+      "createdAt": 1783622865827,
+      "currentSessionToken": "vqbs4lez36r1783662314585"
+    }
+  },
+  "restaurants": {
+    "5we5ska0mgb": {
+      "name": "the spice garden",
+      "ownerId": "mock-demo-owner-uid",
+      "createdAt": 1783264656069
+    }
+  },
+  "outlets": {
+    "s83vdell3or": {
+      "restaurantId": "5we5ska0mgb",
+      "name": "downtown branch",
+      "location": "mumbai",
+      "createdAt": 1783264656081,
+      "kitchenPin": "1234",
+      "tableCount": 13
+    }
+  },
+  "menu_items": {
+    "menu-veg-spring-rolls": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Spring Rolls",
+      "description": "Crispy rolls stuffed with fresh vegetables.",
+      "price": 179,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-paneer-tikka": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer Tikka",
+      "description": "Cottage cheese cubes marinated and grilled.",
+      "price": 269,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-crispy-corn": {
+      "outletId": "s83vdell3or",
+      "name": "Crispy Corn",
+      "description": "Fried sweet corn tossed with spices.",
+      "price": 189,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-hara-bhara-kebab": {
+      "outletId": "s83vdell3or",
+      "name": "Hara Bhara Kebab",
+      "description": "Spinach and green peas patties.",
+      "price": 229,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-manchurian-dry": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Manchurian Dry",
+      "description": "Vegetable balls tossed in Indo-Chinese sauce.",
+      "price": 239,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-lollipop": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Lollipop",
+      "description": "Spicy fried chicken wings.",
+      "price": 299,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-65": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken 65",
+      "description": "South Indian spicy chicken appetizer.",
+      "price": 289,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chilli-chicken-dry": {
+      "outletId": "s83vdell3or",
+      "name": "Chilli Chicken Dry",
+      "description": "Chicken tossed with peppers and soy sauce.",
+      "price": 309,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-fish-fingers": {
+      "outletId": "s83vdell3or",
+      "name": "Fish Fingers",
+      "description": "Crispy coated fish strips.",
+      "price": 349,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-garlic-prawns": {
+      "outletId": "s83vdell3or",
+      "name": "Garlic Prawns",
+      "description": "Butter garlic sautéed prawns.",
+      "price": 449,
+      "category": "Starters",
+      "available": true,
+      "recommended": false
+    },
+    "menu-butter-paneer-masala": {
+      "outletId": "s83vdell3or",
+      "name": "Butter Paneer Masala",
+      "description": "Paneer cooked in creamy tomato gravy.",
+      "price": 299,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-kadai-paneer": {
+      "outletId": "s83vdell3or",
+      "name": "Kadai Paneer",
+      "description": "Spicy paneer with capsicum and onions.",
+      "price": 289,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-dal-tadka": {
+      "outletId": "s83vdell3or",
+      "name": "Dal Tadka",
+      "description": "Yellow lentils tempered with spices.",
+      "price": 199,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-kolhapuri": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Kolhapuri",
+      "description": "Mixed vegetables in spicy gravy.",
+      "price": 259,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-palak-paneer": {
+      "outletId": "s83vdell3or",
+      "name": "Palak Paneer",
+      "description": "Cottage cheese cooked in spinach gravy.",
+      "price": 279,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-butter-chicken": {
+      "outletId": "s83vdell3or",
+      "name": "Butter Chicken",
+      "description": "Chicken in rich buttery tomato gravy.",
+      "price": 379,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-curry": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Curry",
+      "description": "Traditional Indian chicken curry.",
+      "price": 349,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mutton-rogan-josh": {
+      "outletId": "s83vdell3or",
+      "name": "Mutton Rogan Josh",
+      "description": "Kashmiri style mutton curry.",
+      "price": 499,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-fish-curry": {
+      "outletId": "s83vdell3or",
+      "name": "Fish Curry",
+      "description": "Fish cooked in spicy curry.",
+      "price": 429,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-egg-curry": {
+      "outletId": "s83vdell3or",
+      "name": "Egg Curry",
+      "description": "Boiled eggs in onion tomato gravy.",
+      "price": 239,
+      "category": "Main Course",
+      "available": true,
+      "recommended": false
+    },
+    "menu-steamed-rice": {
+      "outletId": "s83vdell3or",
+      "name": "Steamed Rice",
+      "description": "Plain steamed basmati rice.",
+      "price": 129,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-jeera-rice": {
+      "outletId": "s83vdell3or",
+      "name": "Jeera Rice",
+      "description": "Rice flavored with cumin.",
+      "price": 159,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-pulao": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Pulao",
+      "description": "Mixed vegetable pulao.",
+      "price": 219,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-peas-pulao": {
+      "outletId": "s83vdell3or",
+      "name": "Peas Pulao",
+      "description": "Rice cooked with green peas.",
+      "price": 199,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-biryani": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Biryani",
+      "description": "Aromatic vegetable biryani.",
+      "price": 279,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-biryani": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Biryani",
+      "description": "Traditional chicken biryani.",
+      "price": 349,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mutton-biryani": {
+      "outletId": "s83vdell3or",
+      "name": "Mutton Biryani",
+      "description": "Dum cooked mutton biryani.",
+      "price": 459,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-egg-biryani": {
+      "outletId": "s83vdell3or",
+      "name": "Egg Biryani",
+      "description": "Biryani made with boiled eggs.",
+      "price": 249,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-schezwan-fried-rice": {
+      "outletId": "s83vdell3or",
+      "name": "Schezwan Fried Rice",
+      "description": "Spicy Indo-Chinese fried rice.",
+      "price": 229,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-fried-rice": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Fried Rice",
+      "description": "Fried rice with chicken pieces.",
+      "price": 289,
+      "category": "Rice",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-hakka-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Hakka Noodles",
+      "description": "Stir-fried noodles with vegetables.",
+      "price": 229,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-schezwan-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Schezwan Noodles",
+      "description": "Spicy schezwan flavored noodles.",
+      "price": 249,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-garlic-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Garlic Noodles",
+      "description": "Noodles tossed in garlic sauce.",
+      "price": 239,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-singapore-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Singapore Noodles",
+      "description": "Curry flavored noodles.",
+      "price": 269,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-paneer-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer Noodles",
+      "description": "Noodles with paneer cubes.",
+      "price": 279,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-hakka-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Hakka Noodles",
+      "description": "Chicken stir-fried noodles.",
+      "price": 299,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-schezwan-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Schezwan Noodles",
+      "description": "Spicy chicken noodles.",
+      "price": 319,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-egg-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Egg Noodles",
+      "description": "Stir-fried egg noodles.",
+      "price": 269,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mixed-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Mixed Noodles",
+      "description": "Chicken, egg and vegetables.",
+      "price": 339,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-seafood-noodles": {
+      "outletId": "s83vdell3or",
+      "name": "Seafood Noodles",
+      "description": "Noodles with prawns and fish.",
+      "price": 399,
+      "category": "Noodles",
+      "available": true,
+      "recommended": false
+    },
+    "menu-margherita-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Margherita Pizza",
+      "description": "Classic cheese pizza.",
+      "price": 249,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-farmhouse-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Farmhouse Pizza",
+      "description": "Loaded with fresh vegetables.",
+      "price": 349,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-supreme-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Supreme Pizza",
+      "description": "Premium vegetable toppings.",
+      "price": 389,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-paneer-tikka-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer Tikka Pizza",
+      "description": "Indian-style paneer toppings.",
+      "price": 399,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-corn---cheese-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Corn & Cheese Pizza",
+      "description": "Sweet corn with mozzarella cheese.",
+      "price": 319,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-pepperoni-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Pepperoni Pizza",
+      "description": "Classic pepperoni pizza.",
+      "price": 449,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-bbq-chicken-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "BBQ Chicken Pizza",
+      "description": "Smoky barbecue chicken pizza.",
+      "price": 459,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-tikka-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Tikka Pizza",
+      "description": "Chicken tikka with cheese.",
+      "price": 469,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-meat-lovers-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Meat Lovers Pizza",
+      "description": "Loaded with assorted meats.",
+      "price": 549,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-peri-peri-chicken-pizza": {
+      "outletId": "s83vdell3or",
+      "name": "Peri Peri Chicken Pizza",
+      "description": "Spicy peri peri chicken toppings.",
+      "price": 479,
+      "category": "Pizza",
+      "available": true,
+      "recommended": false
+    },
+    "menu-veg-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Veg Burger",
+      "description": "Crispy vegetable patty burger.",
+      "price": 149,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-cheese-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Cheese Burger",
+      "description": "Veg burger with cheese slice.",
+      "price": 179,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-paneer-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer Burger",
+      "description": "Grilled paneer patty burger.",
+      "price": 209,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-aloo-tikki-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Aloo Tikki Burger",
+      "description": "Indian-style potato burger.",
+      "price": 139,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mushroom-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Mushroom Burger",
+      "description": "Juicy mushroom burger.",
+      "price": 199,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Burger",
+      "description": "Crispy chicken burger.",
+      "price": 229,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-grilled-chicken-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Grilled Chicken Burger",
+      "description": "Grilled chicken fillet burger.",
+      "price": 259,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-bbq-chicken-burger": {
+      "outletId": "s83vdell3or",
+      "name": "BBQ Chicken Burger",
+      "description": "Smoky BBQ chicken burger.",
+      "price": 279,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-double-chicken-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Double Chicken Burger",
+      "description": "Double chicken patties with cheese.",
+      "price": 329,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-spicy-chicken-burger": {
+      "outletId": "s83vdell3or",
+      "name": "Spicy Chicken Burger",
+      "description": "Hot and spicy chicken burger.",
+      "price": 249,
+      "category": "Burgers",
+      "available": true,
+      "recommended": false
+    },
+    "menu-coca-cola": {
+      "outletId": "s83vdell3or",
+      "name": "Coca-Cola",
+      "description": "Chilled soft drink.",
+      "price": 60,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-pepsi": {
+      "outletId": "s83vdell3or",
+      "name": "Pepsi",
+      "description": "Refreshing cola drink.",
+      "price": 60,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-sprite": {
+      "outletId": "s83vdell3or",
+      "name": "Sprite",
+      "description": "Lemon-flavored soda.",
+      "price": 60,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-fresh-lime-soda": {
+      "outletId": "s83vdell3or",
+      "name": "Fresh Lime Soda",
+      "description": "Sweet or salted lime soda.",
+      "price": 90,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-cold-coffee": {
+      "outletId": "s83vdell3or",
+      "name": "Cold Coffee",
+      "description": "Chilled coffee with ice cream.",
+      "price": 169,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mango-shake": {
+      "outletId": "s83vdell3or",
+      "name": "Mango Shake",
+      "description": "Thick mango milkshake.",
+      "price": 189,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chocolate-shake": {
+      "outletId": "s83vdell3or",
+      "name": "Chocolate Shake",
+      "description": "Rich chocolate milkshake.",
+      "price": 199,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-oreo-shake": {
+      "outletId": "s83vdell3or",
+      "name": "Oreo Shake",
+      "description": "Creamy Oreo milkshake.",
+      "price": 219,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-masala-chaas": {
+      "outletId": "s83vdell3or",
+      "name": "Masala Chaas",
+      "description": "Traditional spiced buttermilk.",
+      "price": 79,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-mineral-water": {
+      "outletId": "s83vdell3or",
+      "name": "Mineral Water",
+      "description": "Bottled drinking water.",
+      "price": 30,
+      "category": "Beverages",
+      "available": true,
+      "recommended": false
+    },
+    "menu-green-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Green Salad",
+      "description": "Fresh cucumber, onion and tomato salad.",
+      "price": 99,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-caesar-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Caesar Salad",
+      "description": "Lettuce with Caesar dressing.",
+      "price": 199,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-greek-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Greek Salad",
+      "description": "Feta cheese with olives and vegetables.",
+      "price": 229,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-russian-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Russian Salad",
+      "description": "Mixed vegetables in creamy mayonnaise.",
+      "price": 179,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-sprouts-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Sprouts Salad",
+      "description": "Healthy mixed sprouts.",
+      "price": 159,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-corn-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Corn Salad",
+      "description": "Sweet corn with vegetables.",
+      "price": 169,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-paneer-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Paneer Salad",
+      "description": "Fresh paneer cubes with vegetables.",
+      "price": 229,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-fruit-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Fruit Salad",
+      "description": "Seasonal fresh fruits.",
+      "price": 169,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-coleslaw": {
+      "outletId": "s83vdell3or",
+      "name": "Coleslaw",
+      "description": "Creamy cabbage salad.",
+      "price": 139,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chicken-salad": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Salad",
+      "description": "Grilled chicken with fresh vegetables.",
+      "price": 279,
+      "category": "Salads",
+      "available": true,
+      "recommended": false
+    },
+    "menu-gulab-jamun": {
+      "outletId": "s83vdell3or",
+      "name": "Gulab Jamun",
+      "description": "Soft milk dumplings in sugar syrup.",
+      "price": 99,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-rasmalai": {
+      "outletId": "s83vdell3or",
+      "name": "Rasmalai",
+      "description": "Cottage cheese discs in sweet milk.",
+      "price": 139,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-brownie-with-ice-cream": {
+      "outletId": "s83vdell3or",
+      "name": "Brownie with Ice Cream",
+      "description": "Warm brownie served with vanilla ice cream.",
+      "price": 199,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chocolate-lava-cake": {
+      "outletId": "s83vdell3or",
+      "name": "Chocolate Lava Cake",
+      "description": "Molten chocolate cake.",
+      "price": 219,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-vanilla-ice-cream": {
+      "outletId": "s83vdell3or",
+      "name": "Vanilla Ice Cream",
+      "description": "Classic vanilla scoop.",
+      "price": 99,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-chocolate-ice-cream": {
+      "outletId": "s83vdell3or",
+      "name": "Chocolate Ice Cream",
+      "description": "Rich chocolate scoop.",
+      "price": 109,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-butterscotch-ice-cream": {
+      "outletId": "s83vdell3or",
+      "name": "Butterscotch Ice Cream",
+      "description": "Creamy butterscotch scoop.",
+      "price": 109,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-fruit-custard": {
+      "outletId": "s83vdell3or",
+      "name": "Fruit Custard",
+      "description": "Mixed fruits in creamy custard.",
+      "price": 129,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-caramel-pudding": {
+      "outletId": "s83vdell3or",
+      "name": "Caramel Pudding",
+      "description": "Smooth caramel pudding.",
+      "price": 149,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    },
+    "menu-cheesecake": {
+      "outletId": "s83vdell3or",
+      "name": "Cheesecake",
+      "description": "Baked New York-style cheesecake.",
+      "price": 249,
+      "category": "Desserts",
+      "available": true,
+      "recommended": false
+    }
+  },
+  "orders": {
+    "fxskql50irc": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "gizh5cc51ll",
+          "name": "paneer",
+          "price": 250,
+          "quantity": 1
+        }
+      ],
+      "total": 250,
+      "status": "paid",
+      "createdAt": 1783334574887,
+      "paymentMethod": "cash"
+    },
+    "sixxkh8zkyb": {
+      "outletId": "s83vdell3or",
+      "tableId": "2",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "gizh5cc51ll",
+          "name": "paneer",
+          "price": 250,
+          "quantity": 2
+        }
+      ],
+      "total": 500,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 4,
+      "createdAt": 1783408328703,
+      "updatedAt": 1783408614813,
+      "paymentMethod": "upi"
+    },
+    "3ela9j0nb6a": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "gizh5cc51ll",
+          "name": "paneer",
+          "price": 250,
+          "quantity": 1
+        }
+      ],
+      "total": 250,
+      "status": "paid",
+      "createdAt": 1783496528834,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "lw9glk90xp": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        }
+      ],
+      "total": 0,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 4,
+      "createdAt": 1783496703554,
+      "paymentMethod": "cash"
+    },
+    "guemkx4ymg": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "gizh5cc51ll",
+          "name": "paneer",
+          "price": 250,
+          "quantity": 1
+        }
+      ],
+      "total": 250,
+      "status": "paid",
+      "createdAt": 1783496786354,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "h7253udofln": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        }
+      ],
+      "total": 0,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 2,
+      "createdAt": 1783610092889,
+      "paymentMethod": "cash"
+    },
+    "u20a5mmam0q": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "gizh5cc51ll",
+          "name": "paneer",
+          "price": 250,
+          "quantity": 1
+        }
+      ],
+      "total": 250,
+      "status": "paid",
+      "createdAt": 1783610133295,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "h4vez186u5v": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-paneer-tikka",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-crispy-corn",
+          "name": "Crispy Corn",
+          "price": 189,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-garlic-prawns",
+          "name": "Garlic Prawns",
+          "price": 449,
+          "quantity": 1
+        }
+      ],
+      "total": 1086,
+      "status": "paid",
+      "createdAt": 1783621756597,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "kdv54yg7938": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-pepsi",
+          "name": "Pepsi",
+          "price": 60,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-schezwan-noodles",
+          "name": "Schezwan Noodles",
+          "price": 249,
+          "quantity": 1
+        }
+      ],
+      "total": 488,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 2,
+      "createdAt": 1783621856932,
+      "updatedAt": 1783621872669,
+      "paymentMethod": "cash"
+    },
+    "z79rgdk6d4b": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-paneer-tikka",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1
+        }
+      ],
+      "total": 448,
+      "status": "paid",
+      "createdAt": 1783662362259,
+      "waiterName": "Unassigned",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "iqkw6bespfl": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-paneer-tikka",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1
+        }
+      ],
+      "total": 448,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 2,
+      "createdAt": 1783662581912,
+      "updatedAt": 1783662599876,
+      "paymentMethod": "cash"
+    },
+    "wsjsdpgsc9s": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-crispy-corn",
+          "name": "Crispy Corn",
+          "price": 189,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-corn-salad",
+          "name": "Corn Salad",
+          "price": 169,
+          "quantity": 1
+        }
+      ],
+      "total": 537,
+      "status": "paid",
+      "createdAt": 1783666870864,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "relh95ndg9m": {
+      "outletId": "s83vdell3or",
+      "tableId": "10",
+      "status": "paid",
+      "createdAt": 1783656793210.9053,
+      "total": 1535,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.7717022263685319",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.5712169597722969",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 2,
+          "category": "Starters"
+        }
+      ]
+    },
+    "bcxh8nyfo": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "status": "paid",
+      "createdAt": 1783466565902.9253,
+      "total": 665,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.5892573713948516",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 2,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.9545856481935255",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 3,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "0exyk0wa4axh": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "status": "paid",
+      "createdAt": 1783106709830.412,
+      "total": 1204,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.893597970692115",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.9333093923047048",
+          "name": "Gulab Jamun",
+          "price": 99,
+          "quantity": 3,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.5158062776628467",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1,
+          "category": "Starters"
+        }
+      ]
+    },
+    "qnzyufa9him": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "status": "paid",
+      "createdAt": 1783128015287.3718,
+      "total": 1145,
+      "waiterName": "Mock Generator",
+      "guests": 3,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.5870999882285468",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.9126015308906326",
+          "name": "Chocolate Brownie",
+          "price": 149,
+          "quantity": 3,
+          "category": "Desserts"
+        }
+      ]
+    },
+    "ceqhl503i1u": {
+      "outletId": "s83vdell3or",
+      "tableId": "2",
+      "status": "paid",
+      "createdAt": 1783316570920.9783,
+      "total": 1564,
+      "waiterName": "Mock Generator",
+      "guests": 1,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.4633058858833259",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.2386461878146534",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 1,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.4313448867347067",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 1,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.6298065222365754",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 2,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "ibcdgn9wyhh": {
+      "outletId": "s83vdell3or",
+      "tableId": "2",
+      "status": "paid",
+      "createdAt": 1783378438198.8342,
+      "total": 418,
+      "waiterName": "Mock Generator",
+      "guests": 3,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.36361823888881195",
+          "name": "Chocolate Brownie",
+          "price": 149,
+          "quantity": 1,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.9939674082601289",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1,
+          "category": "Starters"
+        }
+      ]
+    },
+    "j0xyo9p0gfp": {
+      "outletId": "s83vdell3or",
+      "tableId": "3",
+      "status": "paid",
+      "createdAt": 1783388602260.7424,
+      "total": 2332,
+      "waiterName": "Mock Generator",
+      "guests": 4,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.5037951949918726",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.036172675148017475",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 1,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.33210870558063044",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 3,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.06924263125358854",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 2,
+          "category": "Starters"
+        }
+      ]
+    },
+    "t6026b08ym9": {
+      "outletId": "s83vdell3or",
+      "tableId": "3",
+      "status": "paid",
+      "createdAt": 1783386548870.5322,
+      "total": 337,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.811041620955187",
+          "name": "Gulab Jamun",
+          "price": 99,
+          "quantity": 2,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.761173510654462",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 1,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "t6f6jbxjwjd": {
+      "outletId": "s83vdell3or",
+      "tableId": "10",
+      "status": "paid",
+      "createdAt": 1783224588444.8796,
+      "total": 927,
+      "waiterName": "Mock Generator",
+      "guests": 1,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.7198159835017912",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 2,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.2757337100813736",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 1,
+          "category": "Mains"
+        }
+      ]
+    },
+    "euw75i88jh7": {
+      "outletId": "s83vdell3or",
+      "tableId": "5",
+      "status": "paid",
+      "createdAt": 1783451196324.737,
+      "total": 437,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.9838890738196121",
+          "name": "Chocolate Brownie",
+          "price": 149,
+          "quantity": 2,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.6436016886190641",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 1,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "nzr3kxomt9l": {
+      "outletId": "s83vdell3or",
+      "tableId": "2",
+      "status": "paid",
+      "createdAt": 1783488435560.8406,
+      "total": 714,
+      "waiterName": "Mock Generator",
+      "guests": 3,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.49557397767892875",
+          "name": "Gulab Jamun",
+          "price": 99,
+          "quantity": 1,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.20632726883131813",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 1,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.5799543023693086",
+          "name": "Gulab Jamun",
+          "price": 99,
+          "quantity": 2,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.01442163697841381",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 2,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "yqoz0jsqxvh": {
+      "outletId": "s83vdell3or",
+      "tableId": "6",
+      "status": "paid",
+      "createdAt": 1783478625806.3093,
+      "total": 1243,
+      "waiterName": "Mock Generator",
+      "guests": 3,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.33957150579487094",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 3,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.1464898132725384",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 2,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.5094026459398778",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 2,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "09l5vxotca9": {
+      "outletId": "s83vdell3or",
+      "tableId": "4",
+      "status": "paid",
+      "createdAt": 1783144368033.7893,
+      "total": 767,
+      "waiterName": "Mock Generator",
+      "guests": 2,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.0530415856334",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.03972207458808874",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 1,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "9948gxwlwot": {
+      "outletId": "s83vdell3or",
+      "tableId": "3",
+      "status": "paid",
+      "createdAt": 1783134264481.1106,
+      "total": 1246,
+      "waiterName": "Mock Generator",
+      "guests": 1,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.6311851245989964",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 1,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.1336879289338042",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        }
+      ]
+    },
+    "dro7d4o9gtr": {
+      "outletId": "s83vdell3or",
+      "tableId": "10",
+      "status": "paid",
+      "createdAt": 1783383332145.7158,
+      "total": 2761,
+      "waiterName": "Mock Generator",
+      "guests": 4,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.38377545436119875",
+          "name": "Chocolate Brownie",
+          "price": 149,
+          "quantity": 1,
+          "category": "Desserts"
+        },
+        {
+          "menuItemId": "mock-item-0.745768330030515",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.23914987338391247",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.8598547195973896",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 2,
+          "category": "Mains"
+        }
+      ]
+    },
+    "6847099k1se": {
+      "outletId": "s83vdell3or",
+      "tableId": "12",
+      "status": "paid",
+      "createdAt": 1783221062406.6904,
+      "total": 847,
+      "waiterName": "Mock Generator",
+      "guests": 4,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.3263534828388699",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.3178489335674868",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 2,
+          "category": "Starters"
+        }
+      ]
+    },
+    "6s0xeb7olhf": {
+      "outletId": "s83vdell3or",
+      "tableId": "11",
+      "status": "paid",
+      "createdAt": 1783110331834.8484,
+      "total": 836,
+      "waiterName": "Mock Generator",
+      "guests": 3,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.5559602480094499",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.28095239012293827",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.35803372255929844",
+          "name": "Chocolate Brownie",
+          "price": 149,
+          "quantity": 2,
+          "category": "Desserts"
+        }
+      ]
+    },
+    "nwodm9z4ktc": {
+      "outletId": "s83vdell3or",
+      "tableId": "8",
+      "status": "paid",
+      "createdAt": 1783392523929.8418,
+      "total": 2451,
+      "waiterName": "Mock Generator",
+      "guests": 1,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.6154356389717619",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 2,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.3276059770208144",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 2,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.5157588867582475",
+          "name": "Chicken 65",
+          "price": 289,
+          "quantity": 2,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.39374623493267313",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        }
+      ]
+    },
+    "n993a9pvbqg": {
+      "outletId": "s83vdell3or",
+      "tableId": "7",
+      "status": "paid",
+      "createdAt": 1783370028801.2412,
+      "total": 1784,
+      "waiterName": "Mock Generator",
+      "guests": 4,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.6890275917155029",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 1,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.5091982279761612",
+          "name": "Paneer Butter Masala",
+          "price": 319,
+          "quantity": 3,
+          "category": "Mains"
+        },
+        {
+          "menuItemId": "mock-item-0.17002356240319105",
+          "name": "Butter Chicken",
+          "price": 349,
+          "quantity": 2,
+          "category": "Mains"
+        }
+      ]
+    },
+    "7j36ax54hvk": {
+      "outletId": "s83vdell3or",
+      "tableId": "5",
+      "status": "paid",
+      "createdAt": 1783647944807.4077,
+      "total": 1342,
+      "waiterName": "Mock Generator",
+      "guests": 1,
+      "items": [
+        {
+          "menuItemId": "mock-item-0.8543760296947203",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 2,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.3054512918046547",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 2,
+          "category": "Starters"
+        },
+        {
+          "menuItemId": "mock-item-0.2667276222076418",
+          "name": "Mojito",
+          "price": 129,
+          "quantity": 3,
+          "category": "Beverages"
+        },
+        {
+          "menuItemId": "mock-item-0.4006086227008344",
+          "name": "Cold Coffee",
+          "price": 139,
+          "quantity": 1,
+          "category": "Beverages"
+        }
+      ]
+    },
+    "kjbw5o05c8r": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-paneer-tikka",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1
+        }
+      ],
+      "total": 448,
+      "status": "paid",
+      "createdAt": 1783667793068,
+      "waiterName": "Unassigned",
+      "guests": 2,
+      "paymentMethod": "cash"
+    },
+    "izj9f41ng3o": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "starter-occupy",
+          "name": "Guest Table Service Started",
+          "price": 0,
+          "quantity": 1
+        }
+      ],
+      "total": 0,
+      "status": "paid",
+      "waiterName": "rahul",
+      "guests": 2,
+      "createdAt": 1783671029124,
+      "paymentMethod": "cash"
+    },
+    "ybcvpy5lvt": {
+      "outletId": "s83vdell3or",
+      "tableId": "1",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "price": 179,
+          "quantity": 1
+        },
+        {
+          "menuItemId": "menu-paneer-tikka",
+          "name": "Paneer Tikka",
+          "price": 269,
+          "quantity": 1
+        }
+      ],
+      "total": 448,
+      "status": "paid",
+      "createdAt": 1783672556969,
+      "waiterName": "rahul",
+      "guests": 2,
+      "paymentMethod": "cash"
+    }
+  },
+  "employees": {
+    "r1pw1ut6ph": {
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "salary": 20000,
+      "pin": "6372",
+      "activationCode": "WLBU14"
+    },
+    "ly56htobtw": {
+      "outletId": "s83vdell3or",
+      "name": "rohan",
+      "email": "rohan@cravecraft.app",
+      "role": "cook",
+      "salary": 50000,
+      "pin": "8018",
+      "activationCode": "3Q4WMH"
+    },
+    "l63n0ipu7c": {
+      "outletId": "s83vdell3or",
+      "name": "Manager",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "salary": 35000,
+      "pin": "1111",
+      "activationCode": "MNG111"
+    },
+    "443qs5sey3p": {
+      "outletId": "s83vdell3or",
+      "name": "aman",
+      "email": "aman@cravecraft.app",
+      "role": "waiter",
+      "salary": 20000,
+      "pin": "6514",
+      "activationCode": "LTYDEI"
+    },
+    "i0w321q9fdq": {
+      "outletId": "s83vdell3or",
+      "name": "Cook Demo",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "salary": 35000,
+      "pin": "2222",
+      "activationCode": "COK222"
+    }
+  },
+  "inventory_items": {
+    "6ce61iqymcu": {
+      "outletId": "s83vdell3or",
+      "name": "Tomato Puree",
+      "quantity": 25,
+      "unit": "kg",
+      "threshold": 20
+    },
+    "s9ww2sdc9cp": {
+      "outletId": "s83vdell3or",
+      "name": "Onions",
+      "quantity": 45,
+      "unit": "kg",
+      "threshold": 10
+    },
+    "ed7sqp31mg7": {
+      "outletId": "s83vdell3or",
+      "name": "Chicken Breast",
+      "quantity": 16,
+      "unit": "kg",
+      "threshold": 15
+    },
+    "0x37e1kk2r0f": {
+      "outletId": "s83vdell3or",
+      "name": "Basmati Rice",
+      "quantity": 120,
+      "unit": "kg",
+      "threshold": 50
+    }
+  },
+  "audit_logs": {
+    "v9uuyx8qi1": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783334144403
+    },
+    "f10l2fg5ar9": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul registered and signed in.",
+      "createdAt": 1783334227869
+    },
+    "487zwfwllwd": {
+      "type": "login_success",
+      "email": "rohan@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "rohan registered and signed in.",
+      "createdAt": 1783334261147
+    },
+    "rmxp2c7doz": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783334435951
+    },
+    "b6t07hmi17n": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul registered and signed in.",
+      "createdAt": 1783334500089
+    },
+    "22qg7qauoup": {
+      "type": "login_success",
+      "email": "rohan@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "rohan registered and signed in.",
+      "createdAt": 1783334532621
+    },
+    "dy3cszh2e97": {
+      "type": "login_success",
+      "email": "rohan@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "rohan signed in via PIN.",
+      "createdAt": 1783334691450
+    },
+    "pzuba34byzs": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783334713669
+    },
+    "1ce18v8jx6xi": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783335878094
+    },
+    "78nzh63nq4b": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783336202407
+    },
+    "o90o631kdbc": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783407685821
+    },
+    "ii70km2c449": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo registered and signed in.",
+      "createdAt": 1783408006743
+    },
+    "92g58frirua": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783408069310
+    },
+    "ji6hgwe4ln": {
+      "type": "login_success",
+      "email": "aman@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "aman registered and signed in.",
+      "createdAt": 1783408439394
+    },
+    "0i8g7f2m7x68": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783408664546
+    },
+    "jfdckbxpaec": {
+      "type": "login_success",
+      "email": "aman@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "aman signed in via PIN.",
+      "createdAt": 1783409006816
+    },
+    "c41dbdtv4ut": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783409025304
+    },
+    "5268ikcxoqh": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783409304761
+    },
+    "wsbesbidphg": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409550626
+    },
+    "xeucq350wxp": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409778212
+    },
+    "uw2hdlnwxvp": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409782888
+    },
+    "pxr6lvaju9": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409801569
+    },
+    "ya6ejmv1hpp": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783409814605
+    },
+    "41penf4785m": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783409823412
+    },
+    "4pysy1jglwi": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409938281
+    },
+    "om6ev13c42": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409951061
+    },
+    "z3sg7lul4cd": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409955260
+    },
+    "ww1qb0rqdn": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409969224
+    },
+    "l45s1wzwap": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783409984946
+    },
+    "5wdrwvdrold": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783410000938
+    },
+    "n4t8d6r0xx": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783410007636
+    },
+    "j1qhkf7fe29": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783410022951
+    },
+    "ddhpb2uexlu": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783410023923
+    },
+    "ra76k0c4onn": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783495450794
+    },
+    "ybgvdjmk9so": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783495457495
+    },
+    "3xnowgfpama": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783495775958
+    },
+    "njw4kfthb1g": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783496550305
+    },
+    "npi8zzd553": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783496681434
+    },
+    "xh9qln9yhp": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783496694442
+    },
+    "1gdcuog2qzd": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783496770320
+    },
+    "4dc528ujbfe": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783609994765
+    },
+    "ew7coj35k0i": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783610025599
+    },
+    "o1y746uzu5h": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783610388257
+    },
+    "nvqa7p74jq": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783610391576
+    },
+    "pcmrrhk0lj": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783610622521
+    },
+    "cashi2ijnhf": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783621679282
+    },
+    "s7bowpuucfi": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783621791480
+    },
+    "o4to7rrm3f": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo registered and signed in.",
+      "createdAt": 1783622865848
+    },
+    "6fuswxww0zq": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo signed in via Email.",
+      "createdAt": 1783622869630
+    },
+    "msep1ixmhz": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via PIN.",
+      "createdAt": 1783622904250
+    },
+    "cqg137iiux": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783622949242
+    },
+    "hm1ap8keg8a": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783662053527
+    },
+    "8k9ae4ama1f": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783662083015
+    },
+    "mbiibnvpqkd": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo signed in via PIN.",
+      "createdAt": 1783662162081
+    },
+    "sxwvl2xoyih": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo signed in via PIN.",
+      "createdAt": 1783662166889
+    },
+    "5jcveal5n26": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo signed in via PIN.",
+      "createdAt": 1783662308363
+    },
+    "vzg6uhlii": {
+      "type": "login_success",
+      "email": "cook@cravecraft.app",
+      "role": "cook",
+      "outletId": "s83vdell3or",
+      "message": "Cook Demo signed in via PIN.",
+      "createdAt": 1783662314573
+    },
+    "et8xvqnnbd9": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783662818692
+    },
+    "ut5jbonn64": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783662823553
+    },
+    "5xspfkz9r2b": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783662873778
+    },
+    "957g2j8zyp7": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783664348953
+    },
+    "toezb3ivbe": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783664905007
+    },
+    "v8b4w71s1xi": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783665634794
+    },
+    "iij3sqoaomq": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783665640086
+    },
+    "fewl5p61wss": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783665818533
+    },
+    "rhafb3c62sh": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783666076129
+    },
+    "fjdxtm2lbk9": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783666080189
+    },
+    "o7gtndpam0d": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783666091418
+    },
+    "i5po04khsm": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783666095449
+    },
+    "0g102bh5gjul": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783666105445
+    },
+    "dbgelffb3kw": {
+      "type": "login_success",
+      "email": "rahul@cravecraft.app",
+      "role": "waiter",
+      "outletId": "s83vdell3or",
+      "message": "rahul signed in via PIN.",
+      "createdAt": 1783667503704
+    },
+    "ypwezogrik": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager signed in via PIN.",
+      "createdAt": 1783667914455
+    },
+    "dcylimp4as": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783669898884
+    },
+    "q9thi3364qm": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783670313936
+    },
+    "aubzp7lcq": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783671366877
+    },
+    "ypv1ifnb35c": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783672301240
+    },
+    "tjevaxr7wp": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783672426762
+    },
+    "7rifoc6ich6": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783672786249
+    },
+    "6emqsbdizj8": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783686456218
+    }
+  },
+  "attendance": {
+    "1t4czu82mob": {
+      "employeeId": "user-rahul-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "role": "waiter",
+      "clockIn": 1783622572735,
+      "clockOut": 1783622630897,
+      "date": "2026-07-09"
+    },
+    "nk5l5hnfnoj": {
+      "employeeId": "user-rahul-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "role": "waiter",
+      "clockIn": 1783662092940,
+      "clockOut": 1783662177680,
+      "date": "2026-07-10"
+    },
+    "jre78nn4nnh": {
+      "employeeId": "user-cook-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "Cook Demo",
+      "role": "cook",
+      "clockIn": 1783662172355,
+      "clockOut": 1783662186191,
+      "date": "2026-07-10"
+    },
+    "irvz5gdx0rl": {
+      "employeeId": "user-rahul-cravecraft-app",
+      "outletId": "s83vdell3or",
+      "name": "rahul",
+      "role": "waiter",
+      "clockIn": 1783667533363,
+      "clockOut": 1783667668344,
+      "date": "2026-07-10"
+    }
+  }
+}
