@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { collection, onSnapshot, query, where, addDoc, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { MenuItem, Order } from "../types";
+import { SearchTrie } from "../lib/trie";
+import { globalRestaurantCache } from "../lib/lru";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, Minus, ShoppingBag, Utensils, CheckCircle2, Search, Sparkles } from "lucide-react";
 
@@ -58,6 +60,14 @@ export function QrMenu() {
     if (!outletId) return;
     
     const fetchRestaurantName = async () => {
+      // 1. Check LRU Cache (Instant O(1) read)
+      const cachedName = globalRestaurantCache.get(outletId);
+      if (cachedName) {
+        setRestaurantName(cachedName);
+        return;
+      }
+
+      // 2. Fetch from Firebase if not in cache
       try {
         const outletRef = doc(db, "outlets", outletId);
         const outletSnap = await getDoc(outletRef);
@@ -68,7 +78,10 @@ export function QrMenu() {
             const restRef = doc(db, "restaurants", restId);
             const restSnap = await getDoc(restRef);
             if (restSnap.exists()) {
-              setRestaurantName(restSnap.data().name);
+              const fetchedName = restSnap.data().name;
+              setRestaurantName(fetchedName);
+              // Save to LRU Cache
+              globalRestaurantCache.put(outletId, fetchedName);
             }
           }
         }
@@ -254,14 +267,29 @@ export function QrMenu() {
       items: menu.filter(m => m.category === category)
   }));
 
+  const searchTrie = useMemo(() => {
+    const trie = new SearchTrie();
+    menu.forEach(item => {
+      trie.insert(item.name, item.id);
+      if (item.description) trie.insert(item.description, item.id);
+    });
+    return trie;
+  }, [menu]);
+
+  const searchMatchIds = useMemo(() => {
+    if (searchQuery.trim().length > 0) {
+      return searchTrie.search(searchQuery);
+    }
+    return null;
+  }, [searchQuery, searchTrie]);
+
   // Apply filters
   const displayedGroups = menuByCategory
     .map(group => ({
       category: group.category,
       items: group.items.filter(item => {
         const matchesCategory = activeCategory === "All" || item.category === activeCategory;
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = searchMatchIds === null || (searchMatchIds.size > 0 && searchMatchIds.has(item.id));
         const isVeg = isVegItem(item.name);
         const matchesDiet = dietFilter === 'all' || 
                             (dietFilter === 'veg' && isVeg) || 
