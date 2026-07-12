@@ -159,7 +159,8 @@ export function QrMenu() {
                   menuItemId: c.item.id,
                   name: realItem.name,   // Always use server-verified name
                   price: realItem.price, // Always use server-verified price
-                  quantity: c.qty
+                  quantity: c.qty,
+                  category: realItem.category || 'Other'
                });
             }
          }

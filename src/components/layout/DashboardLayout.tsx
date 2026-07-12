@@ -33,9 +33,9 @@ export function DashboardLayout() {
   const navItems = allNavItems.filter(item => item.roles.includes(role || ''));
 
   return (
-    <div className="flex h-screen bg-zinc-50 font-sans">
+    <div className="flex h-screen bg-zinc-50 font-sans relative">
       {/* Sidebar */}
-      <aside className="w-64 bg-zinc-950 text-zinc-400 flex flex-col justify-between border-r border-zinc-800 screen-only">
+      <aside className="hidden md:flex w-64 bg-zinc-950 text-zinc-400 flex-col justify-between border-r border-zinc-800 screen-only z-20">
         <div className="py-6 px-6">
           <div className="flex items-center gap-3 mb-8">
             <div className="bg-orange-600 p-2 rounded-xl shadow-lg shadow-orange-600/10">
@@ -91,9 +91,9 @@ export function DashboardLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto">
-        <header className="h-16 bg-white border-b border-zinc-200 flex items-center px-8 justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-zinc-900 mr-4">
+        <header className="h-16 bg-white border-b border-zinc-200 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
+            <h1 className="text-lg md:text-xl font-semibold text-zinc-900 mr-2 md:mr-4 whitespace-nowrap">
               {navItems.find(i => i.path === location.pathname)?.name || "Dashboard"}
             </h1>
             
@@ -137,10 +137,30 @@ export function DashboardLayout() {
               </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
           <Outlet />
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 flex items-center justify-around z-50 px-2 pt-2 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        {navItems.filter(item => !item.external).slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`flex flex-col items-center gap-1 p-2 min-w-[64px] rounded-lg transition-colors ${
+                isActive ? "text-orange-600" : "text-zinc-500 hover:text-zinc-900"
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${isActive ? "text-orange-600" : ""}`} />
+              <span className="text-[10px] font-bold text-center leading-none tracking-tight">{item.name.split(' ')[0]}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

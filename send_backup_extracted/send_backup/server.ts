@@ -730,7 +730,7 @@ async function startServer() {
       // Active staff clockins
       const attendanceMap = getCollectionSql("attendance");
       const activeStaff = Object.entries(attendanceMap)
-        .filter(([_, att]: any) => att.outletId === selectedOutletId && !att.clockOut)
+        .filter(([_, att]: any) => att.outletId === selectedOutletId && att.clockOut === null)
         .map(([id, att]) => ({ id, ...att }));
 
       // Audit security logs

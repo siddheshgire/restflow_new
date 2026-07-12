@@ -350,7 +350,7 @@ export function DashboardOverview() {
             <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
                   <h3 className="text-base font-semibold text-zinc-900 tracking-tight mb-6">Live Kitchen Load</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                  <div className="grid grid-cols-2 gap-4 flex-1">
                     <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 flex flex-col items-center justify-center">
                       <ChefHat className="w-8 h-8 text-orange-600 mb-2" />
                       <span className="text-3xl font-black text-zinc-900">{preparingOrdersCount}</span>

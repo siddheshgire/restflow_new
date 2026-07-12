@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { collection, onSnapshot, query, where, updateDoc, doc, getDoc, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Order } from "../types";
-import { Clock, CheckCircle2, ChevronLeft, Utensils, Volume2, VolumeX, Bell, Lock, UserCheck, ShieldAlert } from "lucide-react";
+import { Clock, CheckCircle2, ChevronLeft, Utensils, Volume2, VolumeX, Bell, Lock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -33,18 +33,6 @@ export function KitchenDisplay() {
     const key = `${orderId}-${itemIdx}`;
     setCheckedItems(prev => ({ ...prev, [key]: !prev[key] }));
   };
-
-  // Chef identity — auto-detect from logged-in dashboard user
-  const getLoggedInUser = () => {
-    try {
-      const raw = localStorage.getItem("mock_auth_user");
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return null;
-  };
-  const loggedInUser = getLoggedInUser();
-  const chefName = loggedInUser?.displayName || loggedInUser?.email?.split("@")[0] || "";
-  const chefId = loggedInUser?.uid || "";
   
   const [currentPage, setCurrentPage] = useState(1);
   const [audioAlertsUnlocked, setAudioAlertsUnlocked] = useState(false);
@@ -187,28 +175,13 @@ export function KitchenDisplay() {
     }
   }, [orders]);
 
-  const claimOrder = async (orderId: string) => {
-    if (!chefId) return; // Not logged in
-    await updateDoc(doc(db, "orders", orderId), { claimedBy: chefId, claimedByName: chefName });
-  };
-
-  const unclaimOrder = async (orderId: string) => {
-    await updateDoc(doc(db, "orders", orderId), { claimedBy: null, claimedByName: null });
-  };
-
   const updateStatus = async (orderId: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'pending' ? 'preparing' : 'ready';
-    const updateData: any = { status: nextStatus };
-    // Auto-claim on "Start Preparing" if not already claimed
-    if (currentStatus === 'pending' && chefName && !orders.find(o => o.id === orderId)?.claimedBy) {
-      updateData.claimedBy = chefId;
-      updateData.claimedByName = chefName;
-    }
-    await updateDoc(doc(db, "orders", orderId), updateData);
+    await updateDoc(doc(db, "orders", orderId), { status: nextStatus });
   };
 
   const markDelivered = async (orderId: string) => {
-    await updateDoc(doc(db, "orders", orderId), { status: 'delivered', claimedBy: null, claimedByName: null });
+    await updateDoc(doc(db, "orders", orderId), { status: 'delivered' });
   };
 
   const handlePinSubmit = async (e: FormEvent) => {
@@ -331,13 +304,10 @@ export function KitchenDisplay() {
         </div>
       )}
 
-
-
       <header className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
         <div>
            <Link to="/dashboard" className="text-zinc-400 hover:text-white flex items-center gap-2 mb-2 text-sm transition-colors"><ChevronLeft className="w-4 h-4" /> Back to Dashboard</Link>
            <h1 className="text-3xl font-bold tracking-tight">Kitchen Display</h1>
-           {chefName && <p className="text-xs text-zinc-500 mt-1">Logged in as: <span className="text-orange-400 font-bold">{chefName}</span></p>}
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center">
@@ -378,12 +348,6 @@ export function KitchenDisplay() {
               <Lock className="w-3.5 h-3.5" />
               Lock KDS
             </button>
-             {chefName && (
-               <span className="flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-400 shadow-sm">
-                 <UserCheck className="w-3.5 h-3.5 text-orange-500" />
-                 {chefName}
-               </span>
-             )}
           </div>
           <div className="flex gap-4 border-l border-zinc-850 pl-6">
              <div className="text-center">
@@ -468,21 +432,9 @@ export function KitchenDisplay() {
                                 </div>
                              )}
                           </div>
-                          <div className="flex flex-col items-end gap-1.5">
-                            <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors duration-1000 ${getBadgeColorClass(order)}`}>
-                               {order.status}
-                            </span>
-                            {order.claimedByName && (
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 ${
-                                order.claimedBy === chefId
-                                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                                  : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                              }`}>
-                                <UserCheck className="w-3 h-3" />
-                                {order.claimedBy === chefId ? 'You' : order.claimedByName}
-                              </span>
-                            )}
-                          </div>
+                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors duration-1000 ${getBadgeColorClass(order)}`}>
+                             {order.status}
+                          </span>
                        </div>
                        
                        <ul className="space-y-3 mt-6">
@@ -513,51 +465,18 @@ export function KitchenDisplay() {
                        </ul>
                     </div>
                     
-                    <div className="p-4 mt-4 border-t border-zinc-800/50 space-y-2">
-                       {/* Claim/Unclaim button for pending/preparing orders */}
-                       {order.status !== 'ready' && (
-                         <div>
-                           {!order.claimedBy ? (
-                             <button
-                               onClick={() => claimOrder(order.id)}
-                               className="w-full py-2 rounded-lg font-bold text-xs uppercase tracking-wider border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                             >
-                               <UserCheck className="w-4 h-4" /> Claim This Order
-                             </button>
-                           ) : order.claimedBy === chefId ? (
-                             <button
-                               onClick={() => unclaimOrder(order.id)}
-                               className="w-full py-2 rounded-lg font-bold text-xs uppercase tracking-wider border border-zinc-700 bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                             >
-                               Release Claim
-                             </button>
-                           ) : (
-                             <div className="w-full py-2 rounded-lg font-bold text-xs uppercase tracking-wider border border-zinc-800 bg-zinc-900 text-zinc-600 flex items-center justify-center gap-1.5">
-                               <ShieldAlert className="w-4 h-4" /> Claimed by {order.claimedByName}
-                             </div>
-                           )}
-                         </div>
-                       )}
-
-                       {/* Status action button */}
+                    <div className="p-4 mt-4 border-t border-zinc-800/50">
                        {order.status !== 'ready' ? (
                           <button
                             onClick={() => updateStatus(order.id, order.status)}
-                            disabled={!!order.claimedBy && order.claimedBy !== chefId}
-                            className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors ${
-                              order.claimedBy && order.claimedBy !== chefId
-                                ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                                : order.status === 'pending'
-                                  ? 'bg-orange-600 hover:bg-orange-500 text-white cursor-pointer'
-                                  : 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer'
-                            }`}
+                            className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors ${order.status === 'pending' ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
                           >
                              {order.status === 'pending' ? 'Start Preparing' : 'Mark Ready'}
                           </button>
                        ) : (
                           <button
                             onClick={() => markDelivered(order.id)}
-                            className="w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex justify-center items-center gap-2 cursor-pointer"
+                            className="w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex justify-center items-center gap-2"
                           >
                              <CheckCircle2 className="w-5 h-5" /> Delivered to Table
                           </button>

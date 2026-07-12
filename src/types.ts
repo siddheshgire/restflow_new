@@ -50,6 +50,8 @@ export interface Order {
   deliveryRider?: string;
   packagingCharge?: number;
   deliveryFee?: number;
+  claimedBy?: string;      // Chef's user ID who claimed this order
+  claimedByName?: string;  // Chef's display name
 }
 
 export interface AttendanceItem {

@@ -196,7 +196,8 @@ export function TableServiceConsole() {
           menuItemId: itemId,
           quantity: qty as number,
           price: item?.price || 0,
-          name: item?.name || "Unknown Item"
+          name: item?.name || "Unknown Item",
+          category: item?.category || 'Other'
         };
       });
 
@@ -865,7 +866,7 @@ export function TableServiceConsole() {
             <p className="text-zinc-500 text-xs mb-4">Provide customer info and select dishes to prepare.</p>
 
             <form onSubmit={handleCreateCustomOrder} className="space-y-4 flex-1 overflow-y-auto pr-1">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Customer Name</label>
                   <input

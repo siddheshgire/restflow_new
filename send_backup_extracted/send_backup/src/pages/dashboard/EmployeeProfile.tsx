@@ -401,7 +401,25 @@ export function EmployeeProfile() {
         <div className="mt-8 pt-8 border-t border-zinc-200">
            <h4 className="text-lg font-bold text-zinc-900 mb-4 tracking-tight">Workspace Control Center</h4>
            
-
+           {/* PWA App Installation Portal */}
+           <div className="mb-6 p-6 rounded-xl border border-orange-200 bg-orange-50/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                 <h5 className="font-bold text-zinc-900 text-base">CraveCraft Desktop & Mobile App</h5>
+                 <p className="text-xs text-zinc-650 mt-1">
+                   {isAppInstalled 
+                     ? "You have already installed CraveCraft on your device! You can run it directly as a standalone application." 
+                     : "Install CraveCraft on your computer or mobile home screen as a standalone application for faster loading and native alerts."}
+                 </p>
+              </div>
+              {!isAppInstalled && (
+                <button 
+                  onClick={handleInstallApp}
+                  className="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-lg text-sm font-semibold hover:from-orange-500 hover:to-amber-400 transition-all shadow-md shadow-orange-600/10 cursor-pointer whitespace-nowrap"
+                >
+                  Install App
+                </button>
+              )}
+           </div>
            {profileData.role === 'cook' && (
              <div className="p-6 rounded-xl border border-orange-200 bg-orange-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
