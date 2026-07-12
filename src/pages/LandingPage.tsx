@@ -80,14 +80,14 @@ export function LandingPage() {
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
               <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
                 {features.map((feature) => (
-                  <div key={feature.name} className="relative pl-16">
-                    <dt className="text-base/7 font-semibold text-zinc-900">
-                      <div className="absolute left-0 top-0 flex size-10 items-center justify-center rounded-lg bg-orange-600">
-                        <feature.icon aria-hidden="true" className="size-6 text-white" />
+                  <div key={feature.name} className="relative p-6 rounded-3xl border border-transparent hover:border-zinc-200 hover:bg-white hover:shadow-2xl hover:shadow-orange-900/5 transition-all duration-500 hover:-translate-y-1 group">
+                    <dt className="text-base font-bold text-zinc-900 flex items-center gap-4">
+                      <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-orange-50 group-hover:bg-orange-600 transition-colors duration-300">
+                        <feature.icon aria-hidden="true" className="size-6 text-orange-600 group-hover:text-white transition-colors duration-300" />
                       </div>
                       {feature.name}
                     </dt>
-                    <dd className="mt-2 text-base/7 text-zinc-600">{feature.description}</dd>
+                    <dd className="mt-4 text-sm leading-relaxed text-zinc-600">{feature.description}</dd>
                   </div>
                 ))}
               </dl>

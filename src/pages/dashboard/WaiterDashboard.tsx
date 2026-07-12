@@ -382,7 +382,7 @@ export function WaiterDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activeOrders.map((order) => (
-           <div key={order.id} className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between">
+           <div key={order.id} className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-xl hover:-translate-y-1.5 hover:border-zinc-300 transition-all duration-300 cursor-default">
               <div>
                  <div className="flex justify-between items-start mb-4">
                     <div>
@@ -500,14 +500,22 @@ export function WaiterDashboard() {
                              Start Delivery Route
                           </button>
                        )}
-                       {order.status === 'out-for-delivery' && (
-                          <div className="grid grid-cols-3 gap-2">
-                             <button onClick={() => markPaid(order.id, 'cash')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Cash</button>
-                             <button onClick={() => markPaid(order.id, 'card')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">Card</button>
-                             <button onClick={() => markPaid(order.id, 'upi')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors">UPI</button>
-                          </div>
-                       )}
-                    </>
+                        {order.status === 'out-for-delivery' && (
+                           <button
+                             onClick={() => markDelivered(order.id)}
+                             className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                           >
+                              Mark Delivered ✅
+                           </button>
+                        )}
+                        {order.status === 'delivered' && (
+                           <div className="grid grid-cols-3 gap-2">
+                              <button onClick={() => markPaid(order.id, 'cash')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center">Cash</button>
+                              <button onClick={() => markPaid(order.id, 'card')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center">Card</button>
+                              <button onClick={() => markPaid(order.id, 'upi')} className="py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center">UPI</button>
+                           </div>
+                        )}
+                     </>
                  )}
               </div>
            </div>

@@ -7,4 +7,7 @@ coverage/
 .env*
 !.env.example
 *.zip
-
+db.sqlite
+db.backup.json
+db.json.tmp
+server.backup.ts

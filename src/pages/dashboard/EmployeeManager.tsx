@@ -182,12 +182,14 @@ export function EmployeeManager() {
 
   const handleDelete = async (id: string) => {
     let empName = "Unknown";
+    let empRole = "";
     try {
       const { getDoc } = await import("firebase/firestore");
       const empSnap = await getDoc(doc(db, "employees", id));
       if (empSnap.exists()) {
         const empData = empSnap.data();
         empName = empData.name || "Unknown";
+        empRole = empData.role || "";
         const cleanEmail = empData.email?.trim().toLowerCase();
         if (cleanEmail) {
           const uid = "user-" + cleanEmail.replace(/[^a-z0-9]/g, "-");
@@ -197,6 +199,24 @@ export function EmployeeManager() {
     } catch (err) {
       console.error("Failed to clean up user record on employee delete:", err);
     }
+
+    try {
+      if (empRole === "waiter" && empName !== "Unknown") {
+        const qOrders = query(
+          collection(db, "orders"),
+          where("outletId", "==", selectedOutletId),
+          where("waiterName", "==", empName),
+          where("status", "in", ["pending", "preparing", "ready", "out-for-delivery", "delivered"])
+        );
+        const ordersSnap = await getDocs(qOrders);
+        for (const orderDoc of ordersSnap.docs) {
+          await updateDoc(doc(db, "orders", orderDoc.id), { waiterName: "Unassigned" });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to reassign active orders on employee delete:", err);
+    }
+
     await deleteDoc(doc(db, "employees", id));
     await logAudit("Delete Employee", `Deleted employee ${empName} (ID: ${id})`);
   };

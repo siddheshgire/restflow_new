@@ -25,9 +25,20 @@ export function QrMenu() {
     }
   }, [cart, outletId, tableId]);
   const [isOrdering, setIsOrdering] = useState(false);
+  const [showSessionBlockedModal, setShowSessionBlockedModal] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [restaurantName, setRestaurantName] = useState("The Spice Garden");
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+
+  // Initialize secure local QR session token
+  const qrSessionToken = useMemo(() => {
+    let token = localStorage.getItem("qr_session_token");
+    if (!token) {
+      token = "QS-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+      localStorage.setItem("qr_session_token", token);
+    }
+    return token;
+  }, []);
 
   // Subscribe to live order session status for this table
   useEffect(() => {
@@ -186,40 +197,66 @@ export function QrMenu() {
              return s !== 'paid' && s !== 'cancelled';
           });
 
-         if (activeOrderDoc) {
-            const activeOrderData = activeOrderDoc.data();
-            const existingItems = activeOrderData.items || [];
-            
-            // Merge items: if item already exists, sum quantities, otherwise push
-            const mergedItems = [...existingItems];
-            orderItems.forEach(newItem => {
-               const idx = mergedItems.findIndex(existing => existing.menuItemId === newItem.menuItemId);
-               if (idx > -1) {
-                  mergedItems[idx].quantity += newItem.quantity;
-               } else {
-                  mergedItems.push(newItem);
-               }
-            });
+          const secureSubtotal = secureTotal;
+          const secureTax = secureSubtotal * 0.05;
+          const secureGrandTotal = secureSubtotal + secureTax;
 
-            await updateDoc(doc(db, "orders", activeOrderDoc.id), {
-               items: mergedItems,
-               total: activeOrderData.total + secureTotal,
-               status: 'pending', // Reset status to pending so kitchen cook & waiters are notified
-               updatedAt: Date.now()
-            });
-         } else {
-            // Place brand-new order session
-            await addDoc(collection(db, "orders"), {
-               outletId,
-               tableId,
-               items: orderItems,
-               total: secureTotal,
-               status: 'pending',
-               createdAt: Date.now(),
-               waiterName: "Unassigned",
-               guests: 2
-            });
-         }
+          if (activeOrderDoc) {
+             const activeOrderData = activeOrderDoc.data();
+             
+             // Anti-Tamper: Verify that the device matches the active table session
+             if (activeOrderData.qrSessionToken && activeOrderData.qrSessionToken !== qrSessionToken) {
+                setShowSessionBlockedModal(true);
+                setIsOrdering(false);
+                return;
+             }
+
+             // Bind session token if started from POS (no token bound yet)
+             const finalSessionToken = activeOrderData.qrSessionToken || qrSessionToken;
+
+             const existingItems = activeOrderData.items || [];
+             
+             // Merge items: if item already exists, sum quantities, otherwise push
+             const mergedItems = [...existingItems];
+             orderItems.forEach(newItem => {
+                const idx = mergedItems.findIndex(existing => existing.menuItemId === newItem.menuItemId);
+                if (idx > -1) {
+                   mergedItems[idx].quantity += newItem.quantity;
+                } else {
+                   mergedItems.push(newItem);
+                }
+             });
+
+             const prevSubtotal = activeOrderData.subtotal || activeOrderData.total || 0;
+             const cumulativeSubtotal = prevSubtotal + secureSubtotal;
+             const cumulativeTax = cumulativeSubtotal * 0.05;
+             const cumulativeGrandTotal = cumulativeSubtotal + cumulativeTax;
+
+             await updateDoc(doc(db, "orders", activeOrderDoc.id), {
+                items: mergedItems,
+                subtotal: cumulativeSubtotal,
+                tax: cumulativeTax,
+                total: cumulativeGrandTotal,
+                status: 'pending', // Reset status to pending so kitchen cook & waiters are notified
+                qrSessionToken: finalSessionToken,
+                updatedAt: Date.now()
+             });
+          } else {
+             // Place brand-new order session
+             await addDoc(collection(db, "orders"), {
+                outletId,
+                tableId,
+                items: orderItems,
+                subtotal: secureSubtotal,
+                tax: secureTax,
+                total: secureGrandTotal,
+                status: 'pending',
+                qrSessionToken,
+                createdAt: Date.now(),
+                waiterName: "Unassigned",
+                guests: 2
+             });
+          }
       } catch (err) {
          console.error("Error placing order:", err);
          alert("Failed to place order. Please try again.");
@@ -288,6 +325,9 @@ export function QrMenu() {
     .map(group => ({
       category: group.category,
       items: group.items.filter(item => {
+        if (item.available === false) return false;
+        if (item.availableForDineIn === false) return false;
+        
         const matchesCategory = activeCategory === "All" || item.category === activeCategory;
         const matchesSearch = searchMatchIds === null || (searchMatchIds.size > 0 && searchMatchIds.has(item.id));
         const isVeg = isVegItem(item.name);
@@ -534,6 +574,30 @@ export function QrMenu() {
              </motion.div>
          )}
       </AnimatePresence>
+      {/* Session Blocked / Anti-Tamper Warning Modal */}
+      {showSessionBlockedModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 font-sans animate-in fade-in duration-200">
+          <motion.div 
+            initial={{ scale: 0.9, y: 15 }}
+            animate={{ scale: 1, y: 0 }}
+            className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-zinc-200 flex flex-col items-center text-center"
+          >
+            <div className="w-16 h-16 bg-red-50 border border-red-200 rounded-full flex items-center justify-center mb-4 text-red-500 shadow-sm shadow-red-100">
+               <span className="text-2xl font-bold">⚠️</span>
+            </div>
+            <h3 className="text-zinc-900 font-extrabold text-lg tracking-tight mb-2">Table Session Locked</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed mb-6">
+              This table's active bill is already locked to another device. If you are part of the same dining group, please request your waiter to update the bill or add items directly from the POS console.
+            </p>
+            <button 
+              onClick={() => setShowSessionBlockedModal(false)}
+              className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl text-xs tracking-wider transition-colors cursor-pointer"
+            >
+              UNDERSTOOD
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -27,6 +27,7 @@ export function Login() {
 
     setLoading(true);
     setError(null);
+    localStorage.removeItem("selectedOutletId"); // Force branch selection on fresh login
     try {
       const user = await signInWithEmail(email, password, isSignUp ? fullName : undefined);
       setSuccess(true);
@@ -159,6 +160,7 @@ export function Login() {
     setPassword(demoPass);
     setError(null);
     setLoading(true);
+    localStorage.removeItem("selectedOutletId"); // Force branch selection on fresh login
 
     try {
       await signInWithEmail(demoEmail, demoPass);

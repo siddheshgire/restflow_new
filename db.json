@@ -5,9 +5,9 @@
       "role": "owner",
       "isPaid": true,
       "hasCompletedOnboarding": true,
-      "passwordHash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791",
-      "createdAt": 1783708757869,
-      "currentSessionToken": "lzoekem1691783713403374"
+      "createdAt": 1783836860154,
+      "currentSessionToken": "okmhodbfchg1783837112255",
+      "passwordHash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791"
     },
     "user-rahul-cravecraft-app": {
       "email": "rahul@cravecraft.app",
@@ -57,7 +57,7 @@
       "hasCompletedOnboarding": true,
       "displayName": "Manager Demo",
       "createdAt": 1783496770307,
-      "currentSessionToken": "6j6uwk2m8ff1783670313943",
+      "currentSessionToken": "2l8d8pofxx91783835835430",
       "passwordHash": "866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5"
     },
     "user-cook-cravecraft-app": {
@@ -1942,6 +1942,99 @@
       "deliveryAddress": "",
       "deliveryRider": "Unassigned",
       "paymentMethod": "cash"
+    },
+    "jyb6kukg76": {
+      "outletId": "s83vdell3or",
+      "tableId": "Takeaway",
+      "items": [
+        {
+          "menuItemId": "menu-chicken-lollipop",
+          "quantity": 1,
+          "price": 299,
+          "name": "Chicken Lollipop"
+        },
+        {
+          "menuItemId": "menu-chilli-chicken-dry",
+          "quantity": 1,
+          "price": 309,
+          "name": "Chilli Chicken Dry"
+        }
+      ],
+      "status": "paid",
+      "total": 653.4000000000001,
+      "createdAt": 1783832530847,
+      "orderType": "takeaway",
+      "customerName": "ram",
+      "customerPhone": "9876543210",
+      "deliveryAddress": "",
+      "deliveryRider": "Unassigned",
+      "packagingCharge": 15,
+      "deliveryFee": 0,
+      "paymentMethod": "upi"
+    },
+    "zf85j5ijpuo": {
+      "outletId": "s83vdell3or",
+      "tableId": "Takeaway",
+      "items": [
+        {
+          "menuItemId": "menu-veg-spring-rolls",
+          "quantity": 1,
+          "price": 179,
+          "name": "Veg Spring Rolls"
+        },
+        {
+          "menuItemId": "menu-chilli-chicken-dry",
+          "quantity": 1,
+          "price": 309,
+          "name": "Chilli Chicken Dry"
+        }
+      ],
+      "status": "paid",
+      "total": 527.4,
+      "createdAt": 1783832700630,
+      "orderType": "takeaway",
+      "customerName": "siddharth",
+      "customerPhone": "9876543210",
+      "deliveryAddress": "",
+      "deliveryRider": "Unassigned",
+      "packagingCharge": 15,
+      "deliveryFee": 0,
+      "paymentMethod": "cash"
+    },
+    "olwto76wx0a": {
+      "outletId": "s83vdell3or",
+      "tableId": "Delivery",
+      "items": [
+        {
+          "menuItemId": "menu-chicken-lollipop",
+          "quantity": 1,
+          "price": 299,
+          "name": "Chicken Lollipop"
+        },
+        {
+          "menuItemId": "menu-chilli-chicken-dry",
+          "quantity": 2,
+          "price": 309,
+          "name": "Chilli Chicken Dry"
+        },
+        {
+          "menuItemId": "menu-mutton-rogan-josh",
+          "quantity": 1,
+          "price": 499,
+          "name": "Mutton Rogan Josh"
+        }
+      ],
+      "status": "paid",
+      "total": 1511.8000000000002,
+      "createdAt": 1783832897389,
+      "orderType": "delivery",
+      "customerName": "ram",
+      "customerPhone": "9876543210",
+      "deliveryAddress": "abc pune maharashtra",
+      "deliveryRider": "Unassigned",
+      "packagingCharge": 15,
+      "deliveryFee": 10,
+      "paymentMethod": "cash"
     }
   },
   "employees": {
@@ -3367,6 +3460,118 @@
       "outletId": "",
       "message": "demo.owner signed in via Email.",
       "createdAt": 1783713403357
+    },
+    "u2mxj75iyvc": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783781968736
+    },
+    "kng9lirahna": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783832253132
+    },
+    "1gzxhh1ohxi": {
+      "action": "Update Order Status",
+      "details": "Order jyb6kukg76 status changed to paid via upi",
+      "outletId": "s83vdell3or",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783832569846,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "ulj1d7yutbl": {
+      "action": "Update Order Status",
+      "details": "Order zf85j5ijpuo status changed to paid via cash",
+      "outletId": "s83vdell3or",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783832712186,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "kzzq15ozbdf": {
+      "action": "Update Order Status",
+      "details": "Order olwto76wx0a status changed to out-for-delivery",
+      "outletId": "s83vdell3or",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783832916426,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "rkhfjiit34q": {
+      "action": "Update Order Status",
+      "details": "Order olwto76wx0a status changed to delivered",
+      "outletId": "s83vdell3or",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783832921131,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "65xehs6rkxi": {
+      "action": "Update Order Status",
+      "details": "Order olwto76wx0a status changed to paid via cash",
+      "outletId": "s83vdell3or",
+      "ownerId": "mock-demo-owner-uid",
+      "timestamp": 1783832923438,
+      "performedBy": "demo.owner@cravecraft.app"
+    },
+    "vaqrtxz5vu8": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783835520300
+    },
+    "wrn652aw2hp": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783835805057
+    },
+    "91d3oqso9eq": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783835831120
+    },
+    "9yrqm1ikuwh": {
+      "type": "login_success",
+      "email": "manager@cravecraft.app",
+      "role": "manager",
+      "outletId": "s83vdell3or",
+      "message": "Manager Demo signed in via Email.",
+      "createdAt": 1783835835417
+    },
+    "m37aahof2yn": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783836296912
+    },
+    "h2jif51kgcg": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783836907367
+    },
+    "8u3v5nz4647": {
+      "type": "login_success",
+      "email": "demo.owner@cravecraft.app",
+      "role": "owner",
+      "outletId": "",
+      "message": "demo.owner signed in via Email.",
+      "createdAt": 1783837112244
     }
   },
   "attendance": {

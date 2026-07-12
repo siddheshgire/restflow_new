@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { User as UserIcon, Briefcase, IndianRupee, Store, LogIn, LogOut, Clock, Key, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, runTransaction } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, runTransaction, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
 export function EmployeeProfile() {
@@ -213,7 +213,7 @@ export function EmployeeProfile() {
     }
   };
 
-  const handleUpdatePin = async (e: React.FormEvent) => {
+  const handleUpdatePin = async (e: FormEvent) => {
     e.preventDefault();
     if (newPinInput.length !== 4) {
       setPinModalError(true);

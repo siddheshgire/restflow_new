@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { collection, onSnapshot, query, where, updateDoc, doc, getDoc, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -163,7 +163,7 @@ export function KitchenDisplay() {
     await updateDoc(doc(db, "orders", orderId), { status: 'delivered' });
   };
 
-  const handlePinSubmit = async (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!outletId) return;
     
@@ -389,7 +389,7 @@ export function KitchenDisplay() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    className={`rounded-xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-1000`}
+                    className={`rounded-2xl border ${getOrderColorClass(order)} overflow-hidden flex flex-col justify-between transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl cursor-default`}
                   >
                     <div className="p-5">
                        <div className="flex justify-between items-start mb-4">

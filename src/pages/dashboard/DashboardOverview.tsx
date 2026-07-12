@@ -46,7 +46,7 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 
 export function DashboardOverview() {
   const { user, selectedOutletId, outlets, role } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'week' | 'month'>(() => {
     return (localStorage.getItem("dashboard_date_filter") as any) || 'week';
@@ -76,251 +76,81 @@ export function DashboardOverview() {
   const outletName = currentOutlet ? currentOutlet.name : "Select or create an outlet";
   const outletLocation = currentOutlet ? currentOutlet.location : "";
 
+  // Dynamic server-side stats fetcher
   useEffect(() => {
     if (!selectedOutletId) {
-      setOrders([]);
+      setStats(null);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-    const q = query(
-      collection(db, "orders"),
-      where("outletId", "==", selectedOutletId)
-    );
+    let isCancelled = false;
+    const loadStats = async () => {
+      setLoading(true);
+      try {
+        const storedUser = localStorage.getItem("mock_auth_user");
+        const userObj = storedUser ? JSON.parse(storedUser) : null;
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setOrders(fetched);
-      setLoading(false);
-    }, (err) => {
-      console.error("Error listening to orders:", err);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [selectedOutletId]);
-
-
-  // ── Memoized computations — only recalculate when orders or dateFilter change ──
-  const now = useMemo(() => new Date(), []);
-  const startOfToday    = useMemo(() => new Date().setHours(0, 0, 0, 0), []);
-  const startOfYesterday = useMemo(() => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).setHours(0, 0, 0, 0), [now]);
-
-  const filteredOrders = useMemo(() => orders.filter(o => {
-    if (!o.createdAt) return false;
-    if (dateFilter === 'today')     return o.createdAt >= startOfToday;
-    if (dateFilter === 'yesterday') return o.createdAt >= startOfYesterday && o.createdAt < startOfToday;
-    if (dateFilter === 'week') {
-      const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).setHours(0, 0, 0, 0);
-      return o.createdAt >= sevenDaysAgo;
-    }
-    if (dateFilter === 'month') {
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).setHours(0, 0, 0, 0);
-      return o.createdAt >= startOfMonth;
-    }
-    return true;
-  }), [orders, dateFilter, startOfToday, startOfYesterday, now]);
-
-  const totalRevenue = useMemo(() =>
-    filteredOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0)
-  , [filteredOrders]);
-
-  const activeOrders = useMemo(() =>
-    orders.filter(o => o.status !== 'paid' && o.status !== 'delivered')
-  , [orders]);
-
-  const occupiedTablesCount = useMemo(() => {
-    const dineInOrders = activeOrders.filter(o => 
-      o.orderType !== 'takeaway' && 
-      o.orderType !== 'delivery' && 
-      o.tableId !== 'Takeaway' && 
-      o.tableId !== 'Delivery'
-    );
-    return new Set(dineInOrders.map(o => o.tableId)).size;
-  }, [activeOrders]);
-  const occupancyRate = useMemo(() => Math.min(100, Math.round((occupiedTablesCount / tableCount) * 100)), [occupiedTablesCount, tableCount]);
-
-  const paidOrders = useMemo(() => filteredOrders.filter(o => o.status === 'paid'), [filteredOrders]);
-  const avgTurnaround = paidOrders.length > 0 ? "26 min" : "32 min";
-
-  // Manager specific computed metrics
-  const preparingOrders = useMemo(() => activeOrders.filter(o => o.status === 'preparing'), [activeOrders]);
-  const readyOrders     = useMemo(() => activeOrders.filter(o => o.status === 'ready'), [activeOrders]);
-  const staleTables     = useMemo(() => activeOrders.filter(o =>
-    o.tableNumber && o.status !== 'paid' && (Date.now() - o.createdAt) > 45 * 60 * 1000
-  ), [activeOrders]);
-
-  // Build chart data based on selected filter — O(N*days) memoized
-  const finalChartData = useMemo(() => {
-    if (dateFilter === 'today' || dateFilter === 'yesterday') {
-      const baseTime = dateFilter === 'today' ? startOfToday : startOfYesterday;
-      return Array.from({ length: 6 }).map((_, i) => {
-        const hourStart = baseTime + i * 4 * 60 * 60 * 1000;
-        const hourEnd   = hourStart + 4 * 60 * 60 * 1000;
-        const label = `${new Date(hourStart).getHours()}:00`;
-        const chunkOrders = orders.filter(o => o.createdAt >= hourStart && o.createdAt < hourEnd);
-        const rev = chunkOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
-        return { name: label, revenue: rev, orders: chunkOrders.length };
-      });
-    }
-    const daysCount = dateFilter === 'week' ? 7 : 30;
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return Array.from({ length: daysCount }).map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (daysCount - 1 - i));
-      const dayName  = dateFilter === 'week' ? daysOfWeek[d.getDay()] : `${d.getDate()} ${daysOfWeek[d.getDay()]}`;
-      const dateStr  = d.toDateString();
-      const dayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === dateStr);
-      const revenue   = dayOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
-      return { name: dayName, revenue, orders: dayOrders.length };
-    });
-  }, [orders, dateFilter, startOfToday, startOfYesterday]);
-
-  // Compute Category Sales for Donut Chart — O(N*items) memoized
-  const categorySales = useMemo(() => {
-    const tally: { [cat: string]: number } = {};
-    filteredOrders.forEach(order => {
-      if (order.status === 'paid' && Array.isArray(order.items)) {
-        order.items.forEach((item: any) => {
-          const cat = item.category || 'Other';
-          if (!tally[cat]) tally[cat] = 0;
-          tally[cat] += (item.price || 0) * (item.quantity || 1);
+        const res = await fetch(`/api/dashboard-stats?dateFilter=${dateFilter}`, {
+          headers: {
+            "X-User-UID": userObj ? userObj.uid : "",
+            "X-Selected-Outlet-ID": selectedOutletId
+          }
         });
+        if (res.ok && !isCancelled) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard stats:", err);
+      } finally {
+        if (!isCancelled) setLoading(false);
       }
-    });
-    return Object.entries(tally).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [filteredOrders]);
+    };
 
+    loadStats();
+
+    // SSE update listener triggers instant re-fetch on database changes
+    const connection = new EventSource("/api/live-updates");
+    connection.onmessage = (event) => {
+      if (event.data === "update") {
+        loadStats();
+      }
+    };
+
+    return () => {
+      isCancelled = true;
+      connection.close();
+    };
+  }, [selectedOutletId, dateFilter]);
+
+  // Server-side pre-calculated stats bindings
+  const totalRevenue = stats?.totalRevenue || 0;
+  const filteredOrdersLength = stats?.ordersCount || 0;
+  const avgTurnaround = stats?.avgTurnaround || "32 min";
+  const occupancyRate = stats?.occupancyRate || 0;
+  const occupiedTablesCount = stats?.occupiedTablesCount || 0;
+  
+  const preparingOrdersCount = stats?.preparingOrdersCount || 0;
+  const readyOrdersCount = stats?.readyOrdersCount || 0;
+  const staleTables = stats?.staleTables || [];
+  
+  const finalChartData = stats?.chartData || [];
+  const categorySales = stats?.categorySales || [];
+  const finalBestSellers = stats?.bestSellers || [];
+  const lowStockItems = stats?.lowStockItems || [];
+  const activeStaff = stats?.activeStaff || [];
+  const finalSecurityLogs = stats?.securityLogs || [];
+  const recentTransactions = stats?.recentTransactions || [];
   const PIE_COLORS = ['#f97316', '#8b5cf6', '#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#64748b'];
-
-  // Tally best selling dishes — O(N*items) memoized
-  const finalBestSellers = useMemo(() => {
-    const tally: { [name: string]: { qty: number; total: number } } = {};
-    filteredOrders.forEach(order => {
-      if (order.status === 'paid' && Array.isArray(order.items)) {
-        order.items.forEach((item: any) => {
-          const name = item.name;
-          if (!tally[name]) tally[name] = { qty: 0, total: 0 };
-          tally[name].qty   += item.quantity || 1;
-          tally[name].total += (item.price || 0) * (item.quantity || 1);
-        });
-      }
-    });
-    return Object.entries(tally)
-      .map(([name, data]) => ({ name, ...data }))
-      .sort((a, b) => b.qty - a.qty)
-      .slice(0, 5);
-  }, [filteredOrders]);
-
-  // Security Audit Logs
-  const [securityLogs, setSecurityLogs] = useState<any[]>([]);
-  // Low Stock Items (for Managers)
-  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
-  // Active Staff (Clocked In)
-  const [activeStaff, setActiveStaff] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (!selectedOutletId || role === 'waiter' || role === 'cook') return;
-
-    if (role === 'owner') {
-      const q = query(
-        collection(db, "audit_logs"),
-        where("outletId", "==", selectedOutletId)
-      );
-
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetched = snapshot.docs.map(doc => {
-          const data = doc.data() as any;
-          return {
-            id: doc.id,
-            createdAt: data.createdAt || 0,
-            ...data
-          };
-        });
-        fetched.sort((a, b) => b.createdAt - a.createdAt);
-        setSecurityLogs(fetched);
-      }, (err) => {
-        console.error("Error listening to audit logs:", err);
-      });
-
-      return () => unsubscribe();
-    }
-  }, [selectedOutletId, role]);
-
-  // Fetch low stock items for BOTH owners and managers (separate effect)
-  useEffect(() => {
-    if (!selectedOutletId || role === 'waiter' || role === 'cook') return;
-
-    const q = query(
-      collection(db, "inventory_items"),
-      where("outletId", "==", selectedOutletId)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as any[];
-      // O(n) filter — items where quantity has dropped to or below threshold
-      const lowStock = fetched.filter(item => item.quantity <= item.threshold);
-      setLowStockItems(lowStock);
-    }, (err) => {
-      console.error("Error listening to inventory for low stock:", err);
-    });
-
-    return () => unsubscribe();
-  }, [selectedOutletId, role]);
-
-
-  // Fetch Active Staff (for both roles)
-  useEffect(() => {
-    if (!selectedOutletId) return;
-    const activeStaffQuery = query(
-      collection(db, "attendance"),
-      where("outletId", "==", selectedOutletId),
-      where("clockOut", "==", null)
-    );
-    
-    const unsubscribeStaff = onSnapshot(activeStaffQuery, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setActiveStaff(fetched);
-    });
-
-    return () => unsubscribeStaff();
-  }, [selectedOutletId]);
-
-  const finalSecurityLogs = securityLogs.slice(0, 5);
-
-  // loading check removed to prevent UI stutter
-
-  if (!selectedOutletId) {
-    return (
-      <div className="max-w-4xl mx-auto py-16 text-center border-2 border-dashed border-zinc-200 rounded-2xl bg-white p-8 shadow-sm">
-        <MapPin className="w-12 h-12 text-zinc-300 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-zinc-950">No outlets found</h3>
-        <p className="text-zinc-500 text-sm mt-2 mb-6">Please complete onboarding or configure your restaurant outlets first.</p>
-        <Link to="/onboarding" className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-500 transition-colors">
-          Go to Onboarding
-        </Link>
-      </div>
-    );
-  }
 
   const welcomeName = user?.displayName || user?.email?.split('@')[0] || "Owner";
 
-  // Financial breakdown calculation
+  // Financial breakdown calculations
   const netValue = totalRevenue;
-  // Assume GST (18%) and Service Charge (5%) are already included in Total Revenue for display.
-  // We reverse-calculate the subtotal for the report.
   const subtotal = Math.round(totalRevenue / 1.23); 
   const mockGst = Math.round(subtotal * 0.18);
   const mockServiceCharge = Math.round(subtotal * 0.05);
-  
-  // Random report audit code
   const reportToken = "REP-" + Math.floor(100000 + Math.random() * 900000) + "-INTEGRITY";
 
   const getRevenueLabel = () => {
@@ -418,9 +248,9 @@ export function DashboardOverview() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 screen-only">
         {[
           { name: getRevenueLabel(), value: `₹${totalRevenue.toLocaleString()}`, change: totalRevenue > 0 ? "Live" : "+0.0%", icon: IndianRupee },
-          { name: getOrdersLabel(), value: `${filteredOrders.length}`, change: filteredOrders.length > 0 ? "Live" : "+0.0%", icon: ShoppingBag },
+          { name: getOrdersLabel(), value: `${filteredOrdersLength}`, change: filteredOrdersLength > 0 ? "Live" : "+0.0%", icon: ShoppingBag },
           { name: "Avg. Turnaround", value: avgTurnaround, change: "-0.0%", icon: TrendingUp },
-          { name: "Table Occupancy", value: `${occupancyRate}%`, change: activeOrders.length > 0 ? "Live" : "+0.0%", icon: Users },
+          { name: "Table Occupancy", value: `${occupancyRate}%`, change: occupiedTablesCount > 0 ? "Live" : "+0.0%", icon: Users },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -429,7 +259,7 @@ export function DashboardOverview() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm hover:-translate-y-1.5 hover:shadow-xl hover:border-zinc-300 transition-all duration-300 cursor-default"
               >
                  <div className="flex items-center justify-between">
                    <div className="text-sm font-medium text-zinc-500">{stat.name}</div>
@@ -451,7 +281,7 @@ export function DashboardOverview() {
           {role === 'owner' ? (
             <>
               {/* Dual-Metric Revenue & Orders Chart */}
-              <div className="lg:col-span-2 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div className="lg:col-span-2 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-xl hover:border-zinc-300 transition-all duration-300">
                  <div className="flex items-center justify-between mb-6">
                     <h3 className="text-base font-semibold text-zinc-900 tracking-tight">Revenue & Orders Trend</h3>
                  </div>
@@ -477,7 +307,7 @@ export function DashboardOverview() {
               </div>
               
               {/* Sales By Category Donut Chart */}
-              <div className="lg:col-span-1 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
+              <div className="lg:col-span-1 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-xl hover:border-zinc-300 transition-all duration-300 flex flex-col">
                  <h3 className="text-base font-semibold text-zinc-900 tracking-tight mb-4">Sales by Category</h3>
                  {categorySales.length > 0 ? (
                    <div className="h-64 w-full flex-1">
@@ -522,12 +352,12 @@ export function DashboardOverview() {
                   <div className="grid grid-cols-2 gap-4 flex-1">
                     <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 flex flex-col items-center justify-center">
                       <ChefHat className="w-8 h-8 text-orange-600 mb-2" />
-                      <span className="text-3xl font-black text-zinc-900">{preparingOrders.length}</span>
+                      <span className="text-3xl font-black text-zinc-900">{preparingOrdersCount}</span>
                       <span className="text-xs font-bold text-orange-600 uppercase tracking-wider mt-1">Preparing</span>
                     </div>
                     <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 flex flex-col items-center justify-center">
                       <CheckCircle2 className="w-8 h-8 text-emerald-600 mb-2" />
-                      <span className="text-3xl font-black text-zinc-900">{readyOrders.length}</span>
+                      <span className="text-3xl font-black text-zinc-900">{readyOrdersCount}</span>
                       <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider mt-1">Ready</span>
                     </div>
                   </div>
@@ -654,7 +484,7 @@ export function DashboardOverview() {
                       </tr>
                    </thead>
                    <tbody className="divide-y divide-zinc-100">
-                      {filteredOrders.filter(o => o.status === 'paid' || o.status === 'cancelled').sort((a,b) => b.createdAt - a.createdAt).slice(0, 15).map((order, idx) => (
+                      {recentTransactions.map((order, idx) => (
                          <tr key={order.id || idx} className="hover:bg-zinc-50/50 transition-colors">
                             <td className="px-4 py-3">
                                <div className="font-mono text-zinc-900 font-semibold uppercase">{(order.id || "").slice(-6)}</div>
@@ -679,8 +509,18 @@ export function DashboardOverview() {
                             </td>
                          </tr>
                       ))}
-                      {filteredOrders.filter(o => o.status === 'paid' || o.status === 'cancelled').length === 0 && (
-                         <tr><td colSpan={5} className="px-4 py-8 text-center text-zinc-500 italic">No past transactions found for this period.</td></tr>
+                      {recentTransactions.length === 0 && (
+                         <tr>
+                           <td colSpan={5} className="px-6 py-12 text-center bg-zinc-50/50">
+                             <div className="flex flex-col items-center justify-center space-y-3">
+                               <div className="w-12 h-12 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm">
+                                 <IndianRupee className="w-5 h-5 text-zinc-300" />
+                               </div>
+                               <h4 className="text-sm font-bold text-zinc-900">No transactions found</h4>
+                               <p className="text-xs text-zinc-500 max-w-sm mx-auto">No past transactions have been recorded for this period yet.</p>
+                             </div>
+                           </td>
+                         </tr>
                       )}
                    </tbody>
                 </table>
@@ -730,8 +570,8 @@ export function DashboardOverview() {
              <div className="grid grid-cols-5 gap-3">
                 {[
                   { label: "Total Revenue", val: `₹${totalRevenue.toLocaleString()}` },
-                  { label: "Total Orders", val: `${filteredOrders.length}` },
-                  { label: "Avg Order Val", val: `₹${filteredOrders.length > 0 ? Math.round(totalRevenue / filteredOrders.length).toLocaleString() : 0}` },
+                  { label: "Total Orders", val: `${filteredOrdersLength}` },
+                  { label: "Avg Order Val", val: `₹${filteredOrdersLength > 0 ? Math.round(totalRevenue / filteredOrdersLength).toLocaleString() : 0}` },
                   { label: "Occupancy", val: `${occupancyRate}%` },
                   { label: "Avg Time", val: avgTurnaround }
                 ].map((stat, i) => (

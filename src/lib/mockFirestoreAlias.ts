@@ -25,10 +25,24 @@ export const collection = (db: any, path: string) => {
   return new MockCollectionRef(path);
 };
 
+const getHeaders = (baseHeaders: Record<string, string> = {}) => {
+  const storedUser = localStorage.getItem("mock_auth_user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const selectedOutletId = localStorage.getItem("selectedOutletId") || "";
+  
+  return {
+    "X-User-UID": user ? user.uid : "",
+    "X-Selected-Outlet-ID": selectedOutletId,
+    ...baseHeaders
+  };
+};
+
 // Fetch collection from server
 const fetchCollection = async (colName: string): Promise<Record<string, any>> => {
   try {
-    const res = await fetch(`/api/db/${colName}`);
+    const res = await fetch(`/api/db/${colName}`, {
+      headers: getHeaders()
+    });
     if (res.ok) {
       return await res.json();
     }
@@ -56,7 +70,7 @@ export const setDoc = async (docRef: MockDocRef, data: any) => {
   try {
     await fetch("/api/db/set", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
     });
   } catch (err) {
@@ -68,7 +82,7 @@ export const updateDoc = async (docRef: MockDocRef, data: any) => {
   try {
     await fetch("/api/db/update", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
     });
   } catch (err) {
@@ -80,7 +94,7 @@ export const deleteDoc = async (docRef: MockDocRef) => {
   try {
     await fetch("/api/db/delete", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path })
     });
   } catch (err) {
@@ -92,7 +106,7 @@ export const addDoc = async (collectionRef: MockCollectionRef, data: any) => {
   try {
     const res = await fetch("/api/db/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: collectionRef.path, data })
     });
     if (res.ok) {

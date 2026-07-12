@@ -59,25 +59,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadOutletInfo = async (uid: string, currentRole: string, email: string | null) => {
     try {
       if (currentRole === 'owner') {
-        const restQuery = query(
-          collection(db, "restaurants"),
+        // Fallback to ownerId directly for backward compatibility with older DB structures
+        const outletQuery = query(
+          collection(db, "outlets"),
           where("ownerId", "==", uid)
         );
-        const restSnap = await getDocs(restQuery);
-        const restaurantIds = restSnap.docs.map(d => d.id);
-        
-        if (restaurantIds.length > 0) {
-          const outletQuery = query(
-            collection(db, "outlets"),
-            where("restaurantId", "in", restaurantIds)
+        const outletSnap = await getDocs(outletQuery);
+        let fetchedOutlets = outletSnap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        })) as Array<{ id: string; name: string; location: string; restaurantId: string }>;
+
+        // If no outlets found by ownerId, try the restaurantId relationship (new structure)
+        if (fetchedOutlets.length === 0) {
+          const restQuery = query(
+            collection(db, "restaurants"),
+            where("ownerId", "==", uid)
           );
-          const outletSnap = await getDocs(outletQuery);
-          const fetchedOutlets = outletSnap.docs.map(d => ({
-            id: d.id,
-            ...d.data()
-          })) as Array<{ id: string; name: string; location: string; restaurantId: string }>;
+          const restSnap = await getDocs(restQuery);
+          const restaurantIds = restSnap.docs.map(d => d.id);
           
-          setOutlets(fetchedOutlets);
+          if (restaurantIds.length > 0) {
+            const nestedOutletQuery = query(
+              collection(db, "outlets"),
+              where("restaurantId", "in", restaurantIds)
+            );
+            const nestedSnap = await getDocs(nestedOutletQuery);
+            fetchedOutlets = nestedSnap.docs.map(d => ({
+              id: d.id,
+              ...d.data()
+            })) as Array<{ id: string; name: string; location: string; restaurantId: string }>;
+          }
+        }
+          
+        setOutlets(fetchedOutlets);
           
           if (fetchedOutlets.length > 0) {
             const storedOutletId = localStorage.getItem("selectedOutletId");
@@ -90,10 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             setSelectedOutletIdState("");
           }
-        } else {
-          setOutlets([]);
-          setSelectedOutletIdState("");
-        }
       } else {
         // For employee roles, fetch the user record to get outletId
         const userDocRef = doc(db, "users", uid);
@@ -149,6 +160,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userDocUnsubscribe = null;
       }
 
+      if (currentUser) {
+        setLoading(true); // Fix race condition: prevent router from navigating before user data loads
+      }
+      
       setUser(currentUser);
       if (currentUser) {
         try {

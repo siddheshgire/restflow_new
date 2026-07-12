@@ -48,6 +48,9 @@ export function TableServiceConsole() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [customQuantities, setCustomQuantities] = useState<Record<string, number>>({});
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
+  const [packagingCharge, setPackagingCharge] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState("");
+  const [activeRiderAssignOrderId, setActiveRiderAssignOrderId] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -186,12 +189,12 @@ export function TableServiceConsole() {
     if (customOrderType === 'delivery' && !deliveryAddr) return;
 
     const selectedItems = Object.entries(customQuantities)
-      .filter(([_, qty]) => qty > 0)
+      .filter(([_, qty]) => (qty as number) > 0)
       .map(([itemId, qty]) => {
         const item = menuMap.get(itemId);
         return {
           menuItemId: itemId,
-          quantity: qty,
+          quantity: qty as number,
           price: item?.price || 0,
           name: item?.name || "Unknown Item"
         };
@@ -205,7 +208,9 @@ export function TableServiceConsole() {
     const subtotal = selectedItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
     const cgst = subtotal * 0.025;
     const sgst = subtotal * 0.025;
-    const total = subtotal + cgst + sgst;
+    const packFee = parseFloat(packagingCharge) || 0;
+    const delFee = customOrderType === 'delivery' ? (parseFloat(deliveryFee) || 0) : 0;
+    const total = subtotal + cgst + sgst + packFee + delFee;
 
     try {
       setIsProcessing(true);
@@ -214,13 +219,17 @@ export function TableServiceConsole() {
         tableId: customOrderType === 'takeaway' ? 'Takeaway' : 'Delivery',
         items: selectedItems,
         status: 'pending',
+        subtotal: subtotal,
+        tax: cgst + sgst,
         total: total,
         createdAt: Date.now(),
         orderType: customOrderType,
         customerName: custName,
         customerPhone: custPhone,
         deliveryAddress: customOrderType === 'delivery' ? deliveryAddr : '',
-        deliveryRider: 'Unassigned'
+        deliveryRider: 'Unassigned',
+        packagingCharge: packFee,
+        deliveryFee: delFee
       });
 
       setIsCustomOrderOpen(false);
@@ -228,6 +237,8 @@ export function TableServiceConsole() {
       setCustPhone("");
       setDeliveryAddr("");
       setCustomQuantities({});
+      setPackagingCharge("");
+      setDeliveryFee("");
     } catch (err) {
       console.error("Error creating custom order:", err);
       alert("Failed to place order.");
@@ -300,6 +311,8 @@ export function TableServiceConsole() {
               quantity: 1
             }
           ],
+          subtotal: 0,
+          tax: 0,
           total: 0,
           status: "pending",
           waiterName: selectedWaiter || "Unassigned",
@@ -599,9 +612,12 @@ export function TableServiceConsole() {
       {activeTab === 'takeaway' && (
         <div className="space-y-4">
           {orders.filter(o => o.orderType === 'takeaway' || o.tableId === 'Takeaway').length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl bg-white text-zinc-500">
-              <ShoppingBag className="w-10 h-10 mx-auto text-zinc-300 mb-3" />
-              <p className="font-semibold text-sm">No active takeaway orders found.</p>
+            <div className="text-center py-16 rounded-3xl bg-zinc-50/50 border border-zinc-200 shadow-sm flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm mb-4">
+                <ShoppingBag className="w-8 h-8 text-amber-500/50" />
+              </div>
+              <h4 className="text-base font-bold text-zinc-900">No takeaway orders</h4>
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">There are no active takeaway orders at the moment. Click "Create Order" to start a new one.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -634,11 +650,17 @@ export function TableServiceConsole() {
                             <span>₹{item.price * item.quantity}</span>
                           </div>
                         ))}
+                        {order.packagingCharge && order.packagingCharge > 0 ? (
+                          <div className="flex justify-between text-xs font-medium text-zinc-500">
+                            <span>Packaging Charge</span>
+                            <span>₹{order.packagingCharge}</span>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 
                     <div className="border-t border-zinc-100 pt-3 flex justify-between items-center font-bold text-sm text-zinc-950">
-                      <span>Total (Incl. Tax):</span>
+                      <span>Total (Incl. Tax & Fees):</span>
                       <span className="text-orange-600 text-base">₹{order.total.toLocaleString()}</span>
                     </div>
 
@@ -675,9 +697,12 @@ export function TableServiceConsole() {
       {activeTab === 'delivery' && (
         <div className="space-y-4">
           {orders.filter(o => o.orderType === 'delivery' || o.tableId === 'Delivery').length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl bg-white text-zinc-500">
-              <Truck className="w-10 h-10 mx-auto text-zinc-300 mb-3" />
-              <p className="font-semibold text-sm">No active delivery orders found.</p>
+            <div className="text-center py-16 rounded-3xl bg-zinc-50/50 border border-zinc-200 shadow-sm flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm mb-4">
+                <Truck className="w-8 h-8 text-purple-500/50" />
+              </div>
+              <h4 className="text-base font-bold text-zinc-900">No delivery orders</h4>
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">There are no active delivery orders at the moment. Click "Create Order" to start a new one.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -716,16 +741,40 @@ export function TableServiceConsole() {
                             <User className="w-3.5 h-3.5 text-zinc-500" /> {order.deliveryRider}
                           </span>
                         ) : (
-                          <select
-                            onChange={(e) => assignRider(order.id, e.target.value)}
-                            defaultValue=""
-                            className="px-2.5 py-1 border border-zinc-200 bg-white rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500"
-                          >
-                            <option value="" disabled>Assign Waiter</option>
-                            {staff.map(s => (
-                              <option key={s.id} value={s.name}>{s.name}</option>
-                            ))}
-                          </select>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setActiveRiderAssignOrderId(activeRiderAssignOrderId === order.id ? null : order.id)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 bg-white hover:bg-zinc-50 rounded-lg text-xs font-bold transition-all cursor-pointer text-zinc-700 shadow-sm"
+                            >
+                              <span>Assign Rider</span>
+                              <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                            </button>
+                            {activeRiderAssignOrderId === order.id && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setActiveRiderAssignOrderId(null)} />
+                                <div className="absolute right-0 mt-1 bottom-full mb-1 w-44 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1.5 max-h-40 overflow-y-auto animate-in fade-in slide-in-from-bottom-1 duration-100">
+                                  {staff.length === 0 ? (
+                                    <p className="text-[10px] text-zinc-400 italic text-center py-2">No waiters active</p>
+                                  ) : (
+                                    staff.map(s => (
+                                      <button
+                                        key={s.id}
+                                        type="button"
+                                        onClick={() => {
+                                          assignRider(order.id, s.name);
+                                          setActiveRiderAssignOrderId(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-650 hover:text-zinc-950 hover:bg-zinc-50 transition-colors cursor-pointer"
+                                      >
+                                        {s.name}
+                                      </button>
+                                    ))
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -739,11 +788,23 @@ export function TableServiceConsole() {
                             <span>₹{item.price * item.quantity}</span>
                           </div>
                         ))}
+                        {order.packagingCharge && order.packagingCharge > 0 ? (
+                          <div className="flex justify-between text-xs font-medium text-zinc-500">
+                            <span>Packaging Charge</span>
+                            <span>₹{order.packagingCharge}</span>
+                          </div>
+                        ) : null}
+                        {order.deliveryFee && order.deliveryFee > 0 ? (
+                          <div className="flex justify-between text-xs font-medium text-zinc-500">
+                            <span>Delivery Fee</span>
+                            <span>₹{order.deliveryFee}</span>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 
                     <div className="border-t border-zinc-100 pt-3 flex justify-between items-center font-bold text-sm text-zinc-950">
-                      <span>Total (Incl. Tax):</span>
+                      <span>Total (Incl. Tax & Fees):</span>
                       <span className="text-orange-600 text-base">₹{order.total.toLocaleString()}</span>
                     </div>
 
@@ -757,6 +818,15 @@ export function TableServiceConsole() {
                     )}
 
                     {order.status === 'out-for-delivery' && (
+                      <button
+                        onClick={() => updateCustomOrderStatus(order.id, 'delivered')}
+                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                      >
+                        Mark Delivered ✅
+                      </button>
+                    )}
+
+                    {order.status === 'delivered' && (
                       <div className="grid grid-cols-3 gap-2 pt-2">
                         <button
                           onClick={() => updateCustomOrderStatus(order.id, 'paid', 'cash')}
@@ -834,6 +904,33 @@ export function TableServiceConsole() {
                 </div>
               )}
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Packaging Charge (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={packagingCharge}
+                    onChange={(e) => setPackagingCharge(e.target.value)}
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g. 10"
+                  />
+                </div>
+                {customOrderType === 'delivery' && (
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Delivery Fee (₹)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={deliveryFee}
+                      onChange={(e) => setDeliveryFee(e.target.value)}
+                      className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      placeholder="e.g. 30"
+                    />
+                  </div>
+                )}
+              </div>
+
               {/* Menu items selection list */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -878,6 +975,9 @@ export function TableServiceConsole() {
                     };
 
                     const filtered = menuItems.filter(item => {
+                      if (customOrderType === 'takeaway' && item.availableForTakeaway === false) return false;
+                      if (customOrderType === 'delivery' && item.availableForDelivery === false) return false;
+
                       const isVeg = isVegItem(item.name);
                       if (dietFilter === 'veg') return isVeg;
                       if (dietFilter === 'non-veg') return !isVeg;
@@ -933,14 +1033,15 @@ export function TableServiceConsole() {
                 </div>
               </div>
 
-              {/* Total Summary Breakdown */}
               {(() => {
                 const subtotal = Object.entries(customQuantities).reduce((sum, [itemId, qty]) => {
                   const item = menuMap.get(itemId);
-                  return sum + (item?.price || 0) * qty;
+                  return sum + (item?.price || 0) * (qty as number);
                 }, 0);
                 const tax = subtotal * 0.05;
-                const grandTotal = subtotal + tax;
+                const packFee = parseFloat(packagingCharge) || 0;
+                const delFee = customOrderType === 'delivery' ? (parseFloat(deliveryFee) || 0) : 0;
+                const grandTotal = subtotal + tax + packFee + delFee;
 
                 return (
                   <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 space-y-1.5 text-xs text-zinc-600 font-medium">
@@ -948,6 +1049,18 @@ export function TableServiceConsole() {
                       <span>Items Subtotal:</span>
                       <span className="text-zinc-900">₹{subtotal.toLocaleString()}</span>
                     </div>
+                    {packFee > 0 && (
+                      <div className="flex justify-between">
+                        <span>Packaging Charge:</span>
+                        <span className="text-zinc-900">₹{packFee.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {delFee > 0 && (
+                      <div className="flex justify-between">
+                        <span>Delivery Fee:</span>
+                        <span className="text-zinc-900">₹{delFee.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Taxes (CGST 2.5% + SGST 2.5%):</span>
                       <span className="text-zinc-900">₹{tax.toLocaleString()}</span>

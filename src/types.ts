@@ -15,6 +15,9 @@ export interface MenuItem {
   image?: string;
   available: boolean;
   recommended: boolean;
+  availableForDineIn?: boolean;
+  availableForTakeaway?: boolean;
+  availableForDelivery?: boolean;
 }
 
 export interface InventoryItem {
@@ -45,6 +48,8 @@ export interface Order {
   customerPhone?: string;
   deliveryAddress?: string;
   deliveryRider?: string;
+  packagingCharge?: number;
+  deliveryFee?: number;
 }
 
 export interface AttendanceItem {

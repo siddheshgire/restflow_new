@@ -2,7 +2,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { collection, onSnapshot, query, where, addDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { MenuItem } from "../../types";
-import { Plus, Edit2, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Edit2, Trash2, ChevronDown, Utensils, ShoppingBag, Truck } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 
 export function MenuManager() {
@@ -12,7 +12,15 @@ export function MenuManager() {
 
   // Form state
   const [isAdding, setIsAdding] = useState(false);
-  const [newItem, setNewItem] = useState({ name: "", description: "", price: "", category: "Mains" });
+  const [newItem, setNewItem] = useState({ 
+    name: "", 
+    description: "", 
+    price: "", 
+    category: "Mains",
+    availableForDineIn: true,
+    availableForTakeaway: true,
+    availableForDelivery: true
+  });
   const [errors, setErrors] = useState<{name?: string; price?: string; general?: string}>({});
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -71,10 +79,21 @@ export function MenuManager() {
       price: priceVal,
       category: newItem.category,
       available: true,
-      recommended: false
+      recommended: false,
+      availableForDineIn: newItem.availableForDineIn,
+      availableForTakeaway: newItem.availableForTakeaway,
+      availableForDelivery: newItem.availableForDelivery
     });
     setIsAdding(false);
-    setNewItem({ name: "", description: "", price: "", category: "Mains" });
+    setNewItem({ 
+      name: "", 
+      description: "", 
+      price: "", 
+      category: "Mains",
+      availableForDineIn: true,
+      availableForTakeaway: true,
+      availableForDelivery: true
+    });
     setErrors({});
   };
 
@@ -115,7 +134,10 @@ export function MenuManager() {
       name: editingItem.name,
       description: editingItem.description,
       price: priceVal,
-      category: editingItem.category
+      category: editingItem.category,
+      availableForDineIn: editingItem.availableForDineIn ?? true,
+      availableForTakeaway: editingItem.availableForTakeaway ?? true,
+      availableForDelivery: editingItem.availableForDelivery ?? true
     });
     setEditingItem(null);
   };
@@ -192,6 +214,44 @@ export function MenuManager() {
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Description</label>
                 <input type="text" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
              </div>
+             <div className="md:col-span-2 border-t border-zinc-150 pt-4 mt-2">
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Available On Channels</label>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNewItem({ ...newItem, availableForDineIn: !newItem.availableForDineIn })}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
+                      newItem.availableForDineIn 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <Utensils className="w-4 h-4" /> Dine-in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewItem({ ...newItem, availableForTakeaway: !newItem.availableForTakeaway })}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
+                      newItem.availableForTakeaway 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <ShoppingBag className="w-4 h-4" /> Takeaway
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewItem({ ...newItem, availableForDelivery: !newItem.availableForDelivery })}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
+                      newItem.availableForDelivery 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <Truck className="w-4 h-4" /> Delivery
+                  </button>
+                </div>
+             </div>
            </div>
            <div className="flex justify-end gap-2">
              <button type="button" onClick={() => { setIsAdding(false); setErrors({}); }} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors">Cancel</button>
@@ -257,6 +317,23 @@ export function MenuManager() {
                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-zinc-900">{item.name}</div>
                         <div className="text-sm text-zinc-500">{item.description}</div>
+                        <div className="flex gap-1.5 mt-1.5">
+                          {(item.availableForDineIn ?? true) && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
+                              <Utensils className="w-2.5 h-2.5" /> Dine-in
+                            </span>
+                          )}
+                          {(item.availableForTakeaway ?? true) && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              <ShoppingBag className="w-2.5 h-2.5" /> Takeaway
+                            </span>
+                          )}
+                          {(item.availableForDelivery ?? true) && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                              <Truck className="w-2.5 h-2.5" /> Delivery
+                            </span>
+                          )}
+                        </div>
                      </td>
                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800">
@@ -284,7 +361,17 @@ export function MenuManager() {
                   </tr>
                 ))}
                 {items.filter(item => selectedCategory === "All" || item.category === selectedCategory).length === 0 && !loading && (
-                  <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-zinc-500">No menu items found in this category.</td></tr>
+                  <tr>
+                    <td colSpan={5} className="px-6 py-16 text-center bg-zinc-50/50">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="w-16 h-16 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm">
+                          <Utensils className="w-8 h-8 text-zinc-300" />
+                        </div>
+                        <h4 className="text-sm font-bold text-zinc-900">No items found</h4>
+                        <p className="text-xs text-zinc-500 max-w-sm mx-auto">It looks like there are no menu items in this category. Click the "Add Item" button above to get started.</p>
+                      </div>
+                    </td>
+                  </tr>
                 )}
             </tbody>
          </table>
@@ -357,6 +444,44 @@ export function MenuManager() {
                   onChange={e => setEditingItem({...editingItem, description: e.target.value})} 
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white" 
                 />
+              </div>
+              <div className="border-t border-zinc-150 pt-4 mt-2">
+                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Available On Channels</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, availableForDineIn: !(editingItem.availableForDineIn ?? true) })}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      (editingItem.availableForDineIn ?? true) 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <Utensils className="w-3.5 h-3.5" /> Dine-in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, availableForTakeaway: !(editingItem.availableForTakeaway ?? true) })}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      (editingItem.availableForTakeaway ?? true) 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" /> Takeaway
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, availableForDelivery: !(editingItem.availableForDelivery ?? true) })}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      (editingItem.availableForDelivery ?? true) 
+                        ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-sm' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-400'
+                    }`}
+                  >
+                    <Truck className="w-3.5 h-3.5" /> Delivery
+                  </button>
+                </div>
               </div>
               <div className="flex justify-end gap-2.5 pt-2">
                 <button type="button" onClick={() => setEditingItem(null)} className="px-4 py-2 text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors cursor-pointer">Cancel</button>
