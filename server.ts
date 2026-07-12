@@ -388,18 +388,42 @@ async function startServer() {
       return res.status(400).json({ error: "auth/email-already-in-use" });
     }
 
-    const newUserData = {
-      email: cleanEmail,
-      role: "owner",
-      isPaid: false,
-      hasCompletedOnboarding: false,
-      passwordHash: hash,
-      displayName: displayName || cleanEmail.split("@")[0],
-      createdAt: Date.now()
-    };
+    // Check if employee is invited in database before defaulting to owner
+    const employees = getCollectionSql("employees");
+    const empEntry = Object.entries(employees).find(([_, emp]: any) => emp.email?.toLowerCase() === cleanEmail);
+
+    let newUserData: any;
+    let jwtPayload: any;
+
+    if (empEntry) {
+      const [_, empData]: any = empEntry;
+      newUserData = {
+        email: cleanEmail,
+        role: empData.role,
+        outletId: empData.outletId,
+        isPaid: true,
+        hasCompletedOnboarding: true,
+        passwordHash: hash,
+        displayName: displayName || empData.name || cleanEmail.split("@")[0],
+        createdAt: Date.now()
+      };
+      jwtPayload = { uid: userId, email: cleanEmail, role: empData.role, outletId: empData.outletId };
+    } else {
+      newUserData = {
+        email: cleanEmail,
+        role: "owner",
+        isPaid: false,
+        hasCompletedOnboarding: false,
+        passwordHash: hash,
+        displayName: displayName || cleanEmail.split("@")[0],
+        createdAt: Date.now()
+      };
+      jwtPayload = { uid: userId, email: cleanEmail, role: "owner", outletId: "" };
+    }
+
     setDocSql("users", userId, newUserData);
 
-    const token = generateJWT({ uid: userId, email: cleanEmail, role: "owner", outletId: "" });
+    const token = generateJWT(jwtPayload);
     res.json({ token, user: { uid: userId, email: cleanEmail, displayName: newUserData.displayName } });
   });
 
