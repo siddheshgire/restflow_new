@@ -6,19 +6,18 @@ export interface User {
   displayName: string | null;
 }
 
-export class FirebaseError extends Error {
-  code: string;
-  constructor(code: string, message: string) {
-    super(message);
-    this.code = code;
-  }
-}
-
-const API_BASE = import.meta.env.VITE_API_URL || "";
-
 const mockAuthObj = {
   currentUser: null as User | null
 };
+
+// Cryptographic hash function using native Web Crypto API (SHA-256)
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
 
 export const getAuth = () => {
   const storedUser = localStorage.getItem("mock_auth_user");
@@ -47,55 +46,72 @@ export const onAuthStateChanged = (auth: any, callback: (user: User | null) => v
 };
 
 export const signInAnonymously = async (auth: any) => {
-  // Demo Owner Login via Registration API
+  const uid = "mock-demo-owner-uid";
+  const user = {
+    uid,
+    email: "demo.owner@cravecraft.app",
+    displayName: "Demo Owner"
+  };
+  localStorage.setItem("mock_auth_user", JSON.stringify(user));
+  
   try {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const passHash = await hashPassword("demo123");
+    // Create/set owner document in backend database
+    await fetch("/api/db/set", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "demo.owner@cravecraft.app", password: "demo123" })
+      body: JSON.stringify({
+        path: `users/${uid}`,
+        data: {
+          email: "demo.owner@cravecraft.app",
+          role: "owner",
+          isPaid: true,
+          hasCompletedOnboarding: true,
+          passwordHash: passHash,
+          createdAt: Date.now()
+        }
+      })
     });
-    
-    if (!res.ok) {
-      throw new Error("Demo credentials validation failed on server.");
-    }
-    
-    const data = await res.json();
-    localStorage.setItem("mock_auth_user", JSON.stringify(data.user));
-    localStorage.setItem("mock_auth_jwt", data.token);
-    notifyAuthListeners(data.user);
-    return { user: data.user };
   } catch (err) {
-    console.error("Demo login failed:", err);
-    throw err;
+    console.error("Error setting mock user doc:", err);
   }
+
+  notifyAuthListeners(user);
+  return { user };
 };
 
 export const signInWithPopup = async (auth: any, provider: any) => {
-  // Mock Google sign in
   const uid = "mock-google-user-uid";
   const user = {
     uid,
     email: "google.user@example.com",
     displayName: "Google User"
   };
-  
-  // Register or login Google user on the server
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user.email, password: "googleAuthPassword123", displayName: user.displayName })
-    });
-    const data = await res.json();
-    const token = data.token || "mock-google-jwt-token";
-    localStorage.setItem("mock_auth_user", JSON.stringify(user));
-    localStorage.setItem("mock_auth_jwt", token);
-  } catch (e) {
-    localStorage.setItem("mock_auth_user", JSON.stringify(user));
-  }
-  
+  localStorage.setItem("mock_auth_user", JSON.stringify(user));
   notifyAuthListeners(user);
   return { user };
+};
+
+const logSecurityEvent = async (type: string, email: string, role: string, outletId: string, message: string) => {
+  try {
+    await fetch("/api/db/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "audit_logs",
+        data: {
+          type,
+          email,
+          role,
+          outletId,
+          message,
+          createdAt: Date.now()
+        }
+      })
+    });
+  } catch (err) {
+    console.error("Failed to write audit log:", err);
+  }
 };
 
 export const signInWithEmailAndPassword = async (auth: any, email: string, password: string, displayName?: string) => {
@@ -104,30 +120,234 @@ export const signInWithEmailAndPassword = async (auth: any, email: string, passw
   }
   
   const cleanEmail = email.trim().toLowerCase();
-  
-  // If displayName is supplied, it is a sign-up action
-  const url = displayName ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
-  const payload = displayName 
-    ? { email: cleanEmail, password, displayName }
-    : { email: cleanEmail, password };
+  const passwordHash = await hashPassword(password);
+  let uid = "user-" + cleanEmail.replace(/[^a-z0-9]/g, "-");
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Authentication failed.");
+  if (cleanEmail === "demo.owner@cravecraft.app") {
+    uid = "mock-demo-owner-uid";
+  } else if (cleanEmail === "google.user@example.com") {
+    uid = "mock-google-user-uid";
   }
 
-  const data = await res.json();
-  localStorage.setItem("mock_auth_user", JSON.stringify(data.user));
-  localStorage.setItem("mock_auth_jwt", data.token);
-  
-  notifyAuthListeners(data.user);
-  return { user: data.user };
+  // Auto-resolve Demo Owner's active outlet ID to synchronize Cook/Waiter/Manager demos
+  let demoOutletId = "";
+  if (["manager@cravecraft.app", "waiter@cravecraft.app", "cook@cravecraft.app"].includes(cleanEmail)) {
+    try {
+      const restRes = await fetch("/api/db/restaurants");
+      const restaurants = await restRes.json();
+      const demoRestEntry = Object.entries(restaurants).find(([_, r]: [string, any]) => r.ownerId === "mock-demo-owner-uid");
+      if (demoRestEntry) {
+        const outletsRes = await fetch("/api/db/outlets");
+        const outlets = await outletsRes.json();
+        const demoOutletEntry = Object.entries(outlets).find(([_, o]: [string, any]) => o.restaurantId === demoRestEntry[0]);
+        if (demoOutletEntry) {
+          demoOutletId = demoOutletEntry[0];
+        }
+      }
+    } catch (err) {
+      console.error("Failed to lookup demo owner outlet:", err);
+    }
+  }
+
+  // Auto-provision demo staff accounts dynamically to mapping outlet
+  if (["manager@cravecraft.app", "waiter@cravecraft.app", "cook@cravecraft.app"].includes(cleanEmail)) {
+    try {
+      const empRes = await fetch("/api/db/employees");
+      const employees = await empRes.json();
+      const empDocEntry = Object.entries(employees).find(([_, e]: [string, any]) => e.email?.toLowerCase() === cleanEmail);
+
+      if (!empDocEntry) {
+        // Resolve outlet to assign them
+        let outletId = demoOutletId;
+        if (!outletId) {
+          const outletsRes = await fetch("/api/db/outlets");
+          const outlets = await outletsRes.json();
+          outletId = Object.keys(outlets)[0] || "demo-outlet-id";
+        }
+        
+        const role = cleanEmail.split("@")[0] as "manager" | "waiter" | "cook";
+        const name = role.charAt(0).toUpperCase() + role.slice(1) + " Demo";
+        const pin = role === "manager" ? "1111" : role === "cook" ? "2222" : "3333";
+        const activationCode = role === "manager" ? "MNG111" : role === "cook" ? "COK222" : "WTR333";
+
+        await fetch("/api/db/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "employees",
+            data: {
+              outletId,
+              name,
+              email: cleanEmail,
+              role,
+              salary: 35000,
+              pin,
+              activationCode
+            }
+          })
+        });
+      } else {
+        // If employee exists but has a mismatched outletId, heal it
+        const [empId, empData]: [string, any] = empDocEntry;
+        if (demoOutletId && empData.outletId !== demoOutletId) {
+          await fetch("/api/db/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: `employees/${empId}`,
+              data: { outletId: demoOutletId }
+            })
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to auto-provision demo staff employee:", err);
+    }
+  }
+
+  // Fetch users collection
+  const usersRes = await fetch("/api/db/users");
+  const users = await usersRes.json();
+  const userDoc = users[uid];
+
+  if (userDoc) {
+    if (displayName && userDoc.passwordHash) {
+      throw new Error("auth/email-already-in-use");
+    }
+    // User doc exists - verify password hash
+    if (userDoc.passwordHash && userDoc.passwordHash !== passwordHash) {
+      await logSecurityEvent("login_failed", cleanEmail, userDoc.role, userDoc.outletId || "", `Failed login attempt for ${cleanEmail} (wrong password).`);
+      throw new Error("auth/wrong-password");
+    }
+    
+    // Auto-update missing password hash, heal mismatched outletId or sync role modifications
+    const updates: any = {};
+    if (!userDoc.passwordHash) {
+      updates.passwordHash = passwordHash;
+    }
+    if (demoOutletId && userDoc.outletId !== demoOutletId) {
+      updates.outletId = demoOutletId;
+      userDoc.outletId = demoOutletId;
+    }
+    
+    // Ensure Demo Owner always has access
+    if (uid === "mock-demo-owner-uid" && (!userDoc.isPaid || !userDoc.hasCompletedOnboarding)) {
+      updates.isPaid = true;
+      updates.hasCompletedOnboarding = true;
+      userDoc.isPaid = true;
+      userDoc.hasCompletedOnboarding = true;
+    }
+
+    // Sync role from employees collection
+    try {
+      const empRes = await fetch("/api/db/employees");
+      const employees = await empRes.json();
+      const empDocEntry = Object.entries(employees).find(([_, emp]: [string, any]) => emp.email?.toLowerCase() === cleanEmail);
+      if (empDocEntry) {
+        const [_, empData]: [string, any] = empDocEntry;
+        if (userDoc.role !== empData.role) {
+          updates.role = empData.role;
+          userDoc.role = empData.role;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to sync employee role on login:", err);
+    }
+
+    if (Object.keys(updates).length > 0) {
+      try {
+        await fetch("/api/db/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: `users/${uid}`,
+            data: updates
+          })
+        });
+      } catch (err) {
+        console.error("Failed to update user doc updates:", err);
+      }
+    }
+
+    const user = {
+      uid,
+      email: userDoc.email,
+      displayName: userDoc.displayName || cleanEmail.split("@")[0]
+    };
+    localStorage.setItem("mock_auth_user", JSON.stringify(user));
+    notifyAuthListeners(user);
+    await logSecurityEvent("login_success", cleanEmail, userDoc.role, userDoc.outletId || "", `${user.displayName} signed in via Email.`);
+    return { user };
+  }
+
+  // If user doesn't exist in users, check if they are an invited employee
+  const empRes = await fetch("/api/db/employees");
+  const employees = await empRes.json();
+  const empDocEntry = Object.entries(employees).find(([_, emp]: [string, any]) => emp.email?.toLowerCase() === cleanEmail);
+
+  if (empDocEntry) {
+    const [_, empData]: [string, any] = empDocEntry;
+    // Provision new user record using employee's details
+    const newUserData = {
+      email: cleanEmail,
+      role: empData.role,
+      outletId: demoOutletId || empData.outletId,
+      isPaid: true, // Owner paid for the SaaS subscription
+      hasCompletedOnboarding: true,
+      passwordHash,
+      displayName: empData.name,
+      createdAt: Date.now()
+    };
+
+    await fetch("/api/db/set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: `users/${uid}`,
+        data: newUserData
+      })
+    });
+
+    const user = {
+      uid,
+      email: cleanEmail,
+      displayName: empData.name
+    };
+    localStorage.setItem("mock_auth_user", JSON.stringify(user));
+    notifyAuthListeners(user);
+    await logSecurityEvent("login_success", cleanEmail, empData.role, empData.outletId, `${empData.name} registered and signed in.`);
+    return { user };
+  }
+
+  // Brand new owner sign-up
+  const newUserData = {
+    email: cleanEmail,
+    role: "owner",
+    isPaid: false,
+    hasCompletedOnboarding: false,
+    passwordHash,
+    displayName: displayName || cleanEmail.split("@")[0],
+    createdAt: Date.now()
+  };
+
+  await fetch("/api/db/set", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      path: `users/${uid}`,
+      data: newUserData
+    })
+  });
+
+  const user = {
+    uid,
+    email: cleanEmail,
+    displayName: displayName || cleanEmail.split("@")[0]
+  };
+  localStorage.setItem("mock_auth_user", JSON.stringify(user));
+  notifyAuthListeners(user);
+  await logSecurityEvent("login_success", cleanEmail, "owner", "", `New Owner ${user.displayName} registered and signed in.`);
+  return { user };
 };
 
 export const signInWithPIN = async (auth: any, pin: string) => {
@@ -135,49 +355,107 @@ export const signInWithPIN = async (auth: any, pin: string) => {
     throw new Error("PIN is required.");
   }
   
-  const res = await fetch(`${API_BASE}/api/auth/pin-login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pin })
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Invalid PIN code.");
-  }
-
-  const data = await res.json();
-  localStorage.setItem("mock_auth_user", JSON.stringify(data.user));
-  localStorage.setItem("mock_auth_jwt", data.token);
+  const empRes = await fetch("/api/db/employees");
+  const employees = await empRes.json();
+  const empDocEntry = Object.entries(employees).find(([_, emp]: [string, any]) => emp.pin === pin);
   
-  notifyAuthListeners(data.user);
-  return { user: data.user };
+  if (!empDocEntry) {
+    await logSecurityEvent("login_failed", "unknown-pin", "unknown", "", `Failed PIN login attempt: Invalid PIN code entered.`);
+    throw new Error("auth/wrong-pin");
+  }
+  
+  const [_, empData]: [string, any] = empDocEntry;
+  const uid = "user-" + empData.email.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  
+  const usersRes = await fetch("/api/db/users");
+  const users = await usersRes.json();
+  let userDoc = users[uid];
+  
+  if (!userDoc) {
+    userDoc = {
+      email: empData.email,
+      role: empData.role,
+      outletId: empData.outletId,
+      isPaid: true,
+      hasCompletedOnboarding: true,
+      displayName: empData.name,
+      createdAt: Date.now()
+    };
+    await fetch("/api/db/set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: `users/${uid}`,
+        data: userDoc
+      })
+    });
+  } else if (userDoc.role !== empData.role) {
+    userDoc.role = empData.role;
+    await fetch("/api/db/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: `users/${uid}`,
+        data: { role: empData.role }
+      })
+    });
+  }
+  
+  const user = {
+    uid,
+    email: empData.email,
+    displayName: empData.name
+  };
+  localStorage.setItem("mock_auth_user", JSON.stringify(user));
+  notifyAuthListeners(user);
+  await logSecurityEvent("login_success", empData.email, empData.role, empData.outletId, `${empData.name} signed in via PIN.`);
+  return { user };
 };
 
 export const signOut = async (auth: any) => {
   localStorage.removeItem("mock_auth_user");
-  localStorage.removeItem("mock_auth_jwt");
-  localStorage.removeItem("selectedOutletId");
   notifyAuthListeners(null);
 };
 
 export const updateUserPassword = async (email: string, oldPassword: string, newPassword: string) => {
-  const token = localStorage.getItem("mock_auth_jwt") || "";
-  const res = await fetch(`${API_BASE}/api/auth/change-password`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify({ oldPassword, newPassword })
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Password change failed.");
+  if (!email || !oldPassword || !newPassword) {
+    throw new Error("All fields are required.");
   }
+  
+  const cleanEmail = email.trim().toLowerCase();
+  const passwordHash = await hashPassword(oldPassword);
+  let uid = "user-" + cleanEmail.replace(/[^a-z0-9]/g, "-");
+  if (cleanEmail === "demo.owner@cravecraft.app") {
+    uid = "mock-demo-owner-uid";
+  }
+  
+  const usersRes = await fetch("/api/db/users");
+  const users = await usersRes.json();
+  const userDoc = users[uid];
+  
+  if (!userDoc) {
+    throw new Error("User record not found.");
+  }
+  
+  if (userDoc.passwordHash && userDoc.passwordHash !== passwordHash) {
+    throw new Error("Incorrect current password.");
+  }
+  
+  const newHash = await hashPassword(newPassword);
+  
+  await fetch("/api/db/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      path: `users/${uid}`,
+      data: { passwordHash: newHash }
+    })
+  });
+  
+  await logSecurityEvent("password_changed", cleanEmail, userDoc.role, userDoc.outletId || "", `${userDoc.displayName || cleanEmail.split("@")[0]} successfully changed their account password.`);
 };
 
 export class GoogleAuthProvider {
   constructor() {}
 }
+

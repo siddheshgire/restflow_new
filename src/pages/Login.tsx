@@ -93,8 +93,7 @@ export function Login() {
       
       // Fetch user role from db to determine redirection
       const uid = user.uid;
-      const API_BASE = import.meta.env.VITE_API_URL || "";
-      const usersRes = await fetch(`${API_BASE}/api/db/users`);
+      const usersRes = await fetch("/api/db/users");
       const users = await usersRes.json();
       const userDoc = users[uid];
       const role = userDoc?.role || "waiter";

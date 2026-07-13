@@ -30,6 +30,7 @@ export function EmployeeProfile() {
   const [clockInTime, setClockInTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [attendanceDocId, setAttendanceDocId] = useState<string | null>(null);
+  const [clockedInElsewhereOutletName, setClockedInElsewhereOutletName] = useState<string | null>(null);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

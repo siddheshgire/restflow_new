@@ -1,7 +1,5 @@
 // mockFirestoreAlias.ts
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
-
 class MockDocRef {
   constructor(public path: string) {}
 }
@@ -28,11 +26,12 @@ export const collection = (db: any, path: string) => {
 };
 
 const getHeaders = (baseHeaders: Record<string, string> = {}) => {
-  const token = localStorage.getItem("mock_auth_jwt") || "";
+  const storedUser = localStorage.getItem("mock_auth_user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
   const selectedOutletId = localStorage.getItem("selectedOutletId") || "";
   
   return {
-    "Authorization": token ? `Bearer ${token}` : "",
+    "X-User-UID": user ? user.uid : "",
     "X-Selected-Outlet-ID": selectedOutletId,
     ...baseHeaders
   };
@@ -41,7 +40,7 @@ const getHeaders = (baseHeaders: Record<string, string> = {}) => {
 // Fetch collection from server
 const fetchCollection = async (colName: string): Promise<Record<string, any>> => {
   try {
-    const res = await fetch(`${API_BASE}/api/db/${colName}`, {
+    const res = await fetch(`/api/db/${colName}`, {
       headers: getHeaders()
     });
     if (res.ok) {
@@ -69,7 +68,7 @@ export const getDoc = async (docRef: MockDocRef) => {
 
 export const setDoc = async (docRef: MockDocRef, data: any) => {
   try {
-    await fetch(`${API_BASE}/api/db/set`, {
+    await fetch("/api/db/set", {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
@@ -81,7 +80,7 @@ export const setDoc = async (docRef: MockDocRef, data: any) => {
 
 export const updateDoc = async (docRef: MockDocRef, data: any) => {
   try {
-    await fetch(`${API_BASE}/api/db/update`, {
+    await fetch("/api/db/update", {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
@@ -93,7 +92,7 @@ export const updateDoc = async (docRef: MockDocRef, data: any) => {
 
 export const deleteDoc = async (docRef: MockDocRef) => {
   try {
-    await fetch(`${API_BASE}/api/db/delete`, {
+    await fetch("/api/db/delete", {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path })
@@ -105,7 +104,7 @@ export const deleteDoc = async (docRef: MockDocRef) => {
 
 export const addDoc = async (collectionRef: MockCollectionRef, data: any) => {
   try {
-    const res = await fetch(`${API_BASE}/api/db/add`, {
+    const res = await fetch("/api/db/add", {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: collectionRef.path, data })
@@ -170,22 +169,13 @@ export const getDocs = async (queryRef: MockQuery | MockCollectionRef) => {
   };
 };
 
-// Global EventSource client singleton scoped to selectedOutletId
+// Global EventSource client singleton
 let sseConnection: EventSource | null = null;
-let currentSseOutletId = "";
 const sseListeners = new Set<() => void>();
 
 const getSSEConnection = () => {
-  const selectedOutletId = localStorage.getItem("selectedOutletId") || "global";
-  
-  if (sseConnection && currentSseOutletId !== selectedOutletId) {
-    sseConnection.close();
-    sseConnection = null;
-  }
-  
   if (!sseConnection) {
-    currentSseOutletId = selectedOutletId;
-    sseConnection = new EventSource(`${API_BASE}/api/live-updates?outletId=${selectedOutletId}`);
+    sseConnection = new EventSource("/api/live-updates");
     sseConnection.onmessage = (event) => {
       if (event.data === "update") {
         sseListeners.forEach(listener => listener());

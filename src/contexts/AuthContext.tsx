@@ -236,14 +236,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (data.role && data.role !== role) {
                 setRole(data.role);
               }
-              
-              if (data.isPaid !== undefined) {
-                setIsPaid(data.isPaid);
-              }
-
-              if (data.hasCompletedOnboarding !== undefined) {
-                setHasCompletedOnboarding(data.hasCompletedOnboarding);
-              }
 
               const dbSessionToken = data.currentSessionToken;
               const curLocalSessionToken = localStorage.getItem("active_session_token");
