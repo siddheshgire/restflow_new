@@ -134,7 +134,26 @@ export function EmployeeManager() {
 
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newEmp.name || !newEmp.email || !newEmp.salary || !newEmp.outletId) return;
+    
+    // Ensure outletId fallback
+    const targetOutletId = newEmp.outletId || selectedOutletId || (outlets.length > 0 ? outlets[0].id : "");
+
+    if (!newEmp.name) {
+      setAddError("Please enter the employee's name.");
+      return;
+    }
+    if (!newEmp.email) {
+      setAddError("Please enter the employee's email address.");
+      return;
+    }
+    if (!newEmp.salary) {
+      setAddError("Please enter the monthly salary.");
+      return;
+    }
+    if (!targetOutletId) {
+      setAddError("Please select or assign an outlet.");
+      return;
+    }
 
     const salaryVal = parseFloat(newEmp.salary);
     if (isNaN(salaryVal) || salaryVal <= 0) {
@@ -169,7 +188,7 @@ export function EmployeeManager() {
     const activationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     await addDoc(collection(db, "employees"), {
-      outletId: newEmp.outletId,
+      outletId: targetOutletId,
       name: newEmp.name,
       email: newEmp.email.trim().toLowerCase(),
       role: newEmp.role,
