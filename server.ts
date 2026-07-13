@@ -131,7 +131,7 @@ function filterTenantData(
       return filtered;
     }
     
-    const tenantCols = ["orders", "employees", "inventory", "audit_logs", "menu_items", "attendance"];
+    const tenantCols = ["orders", "employees", "inventory", "audit_logs", "menu_items", "attendance", "inventory_items"];
     if (tenantCols.includes(colName)) {
       const filtered: Record<string, any> = {};
       Object.entries(colData).forEach(([id, item]) => {
@@ -173,7 +173,7 @@ function filterTenantData(
     return {};
   }
 
-  const tenantCols = ["orders", "inventory", "audit_logs", "menu_items", "attendance"];
+  const tenantCols = ["orders", "inventory", "audit_logs", "menu_items", "attendance", "inventory_items"];
   if (tenantCols.includes(colName)) {
     const filtered: Record<string, any> = {};
     Object.entries(colData).forEach(([id, item]) => {
@@ -208,7 +208,7 @@ function isWriteAuthorized(
 
   if (colName === "orders") return true;
 
-  if (colName === "inventory") {
+  if (colName === "inventory" || colName === "inventory_items") {
     return ["manager", "cook"].includes(userRole);
   }
 
