@@ -448,12 +448,13 @@ async function startServer() {
     }
 
     const [_, empData]: any = empEntry;
-    const userId = "user-" + empData.email.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    const safeEmail = empData.email || `staff-${empData.pin}@cravecraft.app`;
+    const userId = "user-" + safeEmail.toLowerCase().replace(/[^a-z0-9]/g, "-");
     let userDoc = getDocSql("users", userId);
 
     if (!userDoc) {
       userDoc = {
-        email: empData.email,
+        email: safeEmail,
         role: empData.role,
         outletId: empData.outletId,
         isPaid: true,
@@ -464,8 +465,8 @@ async function startServer() {
       setDocSql("users", userId, userDoc);
     }
 
-    const token = generateJWT({ uid: userId, email: empData.email, role: empData.role, outletId: empData.outletId });
-    res.json({ token, user: { uid: userId, email: empData.email, displayName: empData.name } });
+    const token = generateJWT({ uid: userId, email: safeEmail, role: empData.role, outletId: empData.outletId });
+    res.json({ token, user: { uid: userId, email: safeEmail, displayName: empData.name } });
   });
 
   app.post("/api/auth/change-password", authenticateJWT, (req: any, res) => {
