@@ -279,7 +279,7 @@ async function startServer() {
   
   // Allow requests from Vercel
   app.use(cors({
-    origin: ["http://localhost:5173", "https://your-cravecraft-app.vercel.app"],
+    origin: ["http://localhost:5173", "https://restflow-new.vercel.app"],
     credentials: true
   }));
 
