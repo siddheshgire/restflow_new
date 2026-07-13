@@ -44,6 +44,8 @@ export function EmployeeManager() {
   const [isAddOutletOpen, setIsAddOutletOpen] = useState(false);
   const [isEditRoleOpen, setIsEditRoleOpen] = useState(false);
   const [isEditOutletOpen, setIsEditOutletOpen] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
 
   // Performance data
   const [perfFilter, setPerfFilter] = useState<'today' | 'week' | 'month'>('week');
@@ -136,9 +138,10 @@ export function EmployeeManager() {
 
     const salaryVal = parseFloat(newEmp.salary);
     if (isNaN(salaryVal) || salaryVal <= 0) {
-      alert("Please enter a valid monthly salary greater than 0.");
+      setAddError("Please enter a valid monthly salary greater than 0.");
       return;
     }
+    setAddError(null);
 
     const cleanEmail = newEmp.email.trim().toLowerCase();
 
@@ -227,9 +230,10 @@ export function EmployeeManager() {
 
     const salaryVal = parseFloat(editingEmp.salary as any);
     if (isNaN(salaryVal) || salaryVal < 0) {
-      alert("Please enter a valid salary.");
+      setEditError("Please enter a valid salary.");
       return;
     }
+    setEditError(null);
 
     const empRef = doc(db, "employees", editingEmp.id);
     await updateDoc(empRef, {
@@ -251,6 +255,7 @@ export function EmployeeManager() {
 
     await logAudit("Edit Employee Details", `Updated details/role for employee ${editingEmp.name} (Role: ${editingEmp.role}, Salary: ₹${salaryVal})`);
     setEditingEmp(null);
+    setEditError(null);
   };
 
   return (
@@ -329,6 +334,7 @@ export function EmployeeManager() {
       {isAdding && (
         <form onSubmit={handleAdd} className="mb-8 p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
            <h3 className="text-lg font-semibold mb-4 text-zinc-900">Invite New Employee</h3>
+           {addError && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{addError}</div>}
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
              <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Name</label>
@@ -519,7 +525,8 @@ export function EmployeeManager() {
       {editingEmp && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-zinc-200 shadow-2xl relative">
-            <h3 className="text-lg font-bold text-zinc-900 mb-4">Edit Staff Employee</h3>
+            <h3 className="text-lg font-bold text-zinc-900 mb-4">Edit Employee Details</h3>
+            {editError && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{editError}</div>}
             <form onSubmit={handleSaveEditEmp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Name</label>
@@ -601,7 +608,7 @@ export function EmployeeManager() {
                 </div>
               </div>
               <div className="flex justify-end gap-2.5 pt-2">
-                <button type="button" onClick={() => setEditingEmp(null)} className="px-4 py-2 text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors cursor-pointer">Cancel</button>
+                <button type="button" onClick={() => { setEditingEmp(null); setEditError(null); }} className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors">Cancel</button>
                 <button type="submit" className="px-4 py-2 text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 rounded-lg shadow-sm transition-colors cursor-pointer">Save Changes</button>
               </div>
             </form>

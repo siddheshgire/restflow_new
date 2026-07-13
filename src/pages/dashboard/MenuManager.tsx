@@ -27,6 +27,7 @@ export function MenuManager() {
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [isAddCatOpen, setIsAddCatOpen] = useState(false);
   const [isEditCatOpen, setIsEditCatOpen] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const menuCategories = ["Starters", "Mains", "Main Course", "Rice", "Noodles", "Pizza", "Burgers", "Beverages", "Salads", "Desserts"];
 
@@ -119,9 +120,10 @@ export function MenuManager() {
     
     const priceVal = parseFloat(editingItem.price as any);
     if (isNaN(priceVal) || priceVal <= 0) {
-      alert("Please enter a valid price greater than 0.");
+      setEditError("Please enter a valid price greater than 0.");
       return;
     }
+    setEditError(null);
 
     if (editingItem.id.startsWith('mock')) {
       setItems(items.map(item => item.id === editingItem.id ? { ...editingItem, price: priceVal } : item));
@@ -140,6 +142,7 @@ export function MenuManager() {
       availableForDelivery: editingItem.availableForDelivery ?? true
     });
     setEditingItem(null);
+    setEditError(null);
   };
 
 
@@ -380,6 +383,7 @@ export function MenuManager() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-zinc-200 shadow-2xl relative">
             <h3 className="text-lg font-bold text-zinc-900 mb-4">Edit Menu Item</h3>
+            {editError && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{editError}</div>}
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Name</label>

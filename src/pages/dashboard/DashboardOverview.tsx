@@ -86,13 +86,14 @@ export function DashboardOverview() {
 
     let isCancelled = false;
     const loadStats = async () => {
-      setLoading(true);
+      if (!stats) setLoading(true);
       try {
         const storedUser = localStorage.getItem("mock_auth_user");
         const userObj = storedUser ? JSON.parse(storedUser) : null;
 
         const token = localStorage.getItem("mock_auth_jwt") || "";
-        const res = await fetch(`/api/dashboard-stats?dateFilter=${dateFilter}`, {
+        const API_BASE = import.meta.env.VITE_API_URL || "";
+        const res = await fetch(`${API_BASE}/api/dashboard-stats?dateFilter=${dateFilter}`, {
           headers: {
             "Authorization": token ? `Bearer ${token}` : "",
             "X-Selected-Outlet-ID": selectedOutletId
@@ -112,7 +113,8 @@ export function DashboardOverview() {
     loadStats();
 
     // SSE update listener triggers instant re-fetch on database changes
-    const connection = new EventSource(`/api/live-updates?outletId=${selectedOutletId || "global"}`);
+    const API_BASE = import.meta.env.VITE_API_URL || "";
+    const connection = new EventSource(`${API_BASE}/api/live-updates?outletId=${selectedOutletId || "global"}`);
     connection.onmessage = (event) => {
       if (event.data === "update") {
         loadStats();

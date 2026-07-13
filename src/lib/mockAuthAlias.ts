@@ -6,6 +6,16 @@ export interface User {
   displayName: string | null;
 }
 
+export class FirebaseError extends Error {
+  code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 const mockAuthObj = {
   currentUser: null as User | null
 };
@@ -39,7 +49,7 @@ export const onAuthStateChanged = (auth: any, callback: (user: User | null) => v
 export const signInAnonymously = async (auth: any) => {
   // Demo Owner Login via Registration API
   try {
-    const res = await fetch("/api/auth/login", {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: "demo.owner@cravecraft.app", password: "demo123" })
@@ -71,7 +81,7 @@ export const signInWithPopup = async (auth: any, provider: any) => {
   
   // Register or login Google user on the server
   try {
-    const res = await fetch("/api/auth/register", {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: user.email, password: "googleAuthPassword123", displayName: user.displayName })
@@ -96,7 +106,7 @@ export const signInWithEmailAndPassword = async (auth: any, email: string, passw
   const cleanEmail = email.trim().toLowerCase();
   
   // If displayName is supplied, it is a sign-up action
-  const url = displayName ? "/api/auth/register" : "/api/auth/login";
+  const url = displayName ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
   const payload = displayName 
     ? { email: cleanEmail, password, displayName }
     : { email: cleanEmail, password };
@@ -125,7 +135,7 @@ export const signInWithPIN = async (auth: any, pin: string) => {
     throw new Error("PIN is required.");
   }
   
-  const res = await fetch("/api/auth/pin-login", {
+  const res = await fetch(`${API_BASE}/api/auth/pin-login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pin })
@@ -153,7 +163,7 @@ export const signOut = async (auth: any) => {
 
 export const updateUserPassword = async (email: string, oldPassword: string, newPassword: string) => {
   const token = localStorage.getItem("mock_auth_jwt") || "";
-  const res = await fetch("/api/auth/change-password", {
+  const res = await fetch(`${API_BASE}/api/auth/change-password`, {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",

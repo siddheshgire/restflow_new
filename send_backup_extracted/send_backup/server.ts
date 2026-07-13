@@ -1,3 +1,17 @@
+
+import cors from "cors";
+
+// ... existing imports
+
+const app = express();
+
+// Allow requests from Vercel
+app.use(cors({
+  origin: ["http://localhost:5173", "https://your-cravecraft-app.vercel.app"],
+  credentials: true
+}));
+
+
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -30,8 +44,8 @@ function hashPassword(password: string): string {
 
 function generateJWT(payload: any): string {
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
-  const body = Buffer.from(JSON.stringify({ 
-    ...payload, 
+  const body = Buffer.from(JSON.stringify({
+    ...payload,
     exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 // 24 Hours
   })).toString("base64url");
   const signature = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${body}`).digest("base64url");
@@ -82,7 +96,7 @@ function getCollectionSql(colName: string): Record<string, any> {
   for (const row of rows) {
     try {
       result[row.doc_id] = JSON.parse(row.data);
-    } catch {}
+    } catch { }
   }
   return result;
 }
@@ -94,7 +108,7 @@ function getOwnerOutletIds(ownerId: string): string[] {
   const restIds = Object.entries(restData)
     .filter(([_, r]) => r.ownerId === ownerId)
     .map(([id]) => id);
-    
+
   if (restIds.length === 0) return [];
 
   // Get outlets associated with those restaurants
@@ -102,7 +116,7 @@ function getOwnerOutletIds(ownerId: string): string[] {
   const outletIds = Object.entries(outletData)
     .filter(([_, o]) => restIds.includes(o.restaurantId))
     .map(([id]) => id);
-    
+
   return outletIds;
 }
 
@@ -150,7 +164,7 @@ function filterTenantData(
       });
       return filtered;
     }
-    
+
     // Tenant scoped entities
     const tenantCols = ["orders", "employees", "inventory", "audit_logs", "menu_items", "attendance", "inventory_items"];
     if (tenantCols.includes(colName)) {
@@ -283,17 +297,17 @@ async function startServer() {
   const authenticateJWT = (req: any, res: any, next: any) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-    
+
     if (!token) {
       req.user = null;
       return next();
     }
-    
+
     const user = verifyJWT(token);
     if (!user) {
       return res.status(401).json({ error: "Access Denied: Invalid or expired token." });
     }
-    
+
     req.user = user;
     next();
   };
@@ -301,7 +315,7 @@ async function startServer() {
   // SSE Scoped Endpoint
   app.get("/api/live-updates", (req, res) => {
     const outletId = req.query.outletId as string || "global";
-    
+
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -489,7 +503,7 @@ async function startServer() {
       }
 
       setDocSql(colName, docId, data);
-      
+
       const outletId = data?.outletId || selectedOutletId;
       if (outletId) notifyClientsOfOutlet(outletId);
       notifyClientsOfOutlet("global");
@@ -527,7 +541,7 @@ async function startServer() {
       }
 
       setDocSql(colName, docId, mergedData);
-      
+
       const outletId = mergedData?.outletId || selectedOutletId;
       if (outletId) notifyClientsOfOutlet(outletId);
       notifyClientsOfOutlet("global");
@@ -553,7 +567,7 @@ async function startServer() {
       }
 
       deleteDocSql(colName, docId);
-      
+
       const outletId = existingData?.outletId || selectedOutletId;
       if (outletId) notifyClientsOfOutlet(outletId);
       notifyClientsOfOutlet("global");
@@ -823,7 +837,7 @@ async function startServer() {
         createdAt: Date.now(),
         outletId: ""
       };
-      
+
       const logId = "log_" + Math.random().toString(36).substr(2, 9);
       setDocSql("audit_logs", logId, auditLog);
       notifyClientsOfOutlet("global");

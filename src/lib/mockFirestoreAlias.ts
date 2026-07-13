@@ -1,5 +1,7 @@
 // mockFirestoreAlias.ts
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 class MockDocRef {
   constructor(public path: string) {}
 }
@@ -39,7 +41,7 @@ const getHeaders = (baseHeaders: Record<string, string> = {}) => {
 // Fetch collection from server
 const fetchCollection = async (colName: string): Promise<Record<string, any>> => {
   try {
-    const res = await fetch(`/api/db/${colName}`, {
+    const res = await fetch(`${API_BASE}/api/db/${colName}`, {
       headers: getHeaders()
     });
     if (res.ok) {
@@ -67,7 +69,7 @@ export const getDoc = async (docRef: MockDocRef) => {
 
 export const setDoc = async (docRef: MockDocRef, data: any) => {
   try {
-    await fetch("/api/db/set", {
+    await fetch(`${API_BASE}/api/db/set`, {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
@@ -79,7 +81,7 @@ export const setDoc = async (docRef: MockDocRef, data: any) => {
 
 export const updateDoc = async (docRef: MockDocRef, data: any) => {
   try {
-    await fetch("/api/db/update", {
+    await fetch(`${API_BASE}/api/db/update`, {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path, data })
@@ -91,7 +93,7 @@ export const updateDoc = async (docRef: MockDocRef, data: any) => {
 
 export const deleteDoc = async (docRef: MockDocRef) => {
   try {
-    await fetch("/api/db/delete", {
+    await fetch(`${API_BASE}/api/db/delete`, {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: docRef.path })
@@ -103,7 +105,7 @@ export const deleteDoc = async (docRef: MockDocRef) => {
 
 export const addDoc = async (collectionRef: MockCollectionRef, data: any) => {
   try {
-    const res = await fetch("/api/db/add", {
+    const res = await fetch(`${API_BASE}/api/db/add`, {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ path: collectionRef.path, data })
@@ -183,7 +185,7 @@ const getSSEConnection = () => {
   
   if (!sseConnection) {
     currentSseOutletId = selectedOutletId;
-    sseConnection = new EventSource(`/api/live-updates?outletId=${selectedOutletId}`);
+    sseConnection = new EventSource(`${API_BASE}/api/live-updates?outletId=${selectedOutletId}`);
     sseConnection.onmessage = (event) => {
       if (event.data === "update") {
         sseListeners.forEach(listener => listener());
