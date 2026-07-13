@@ -346,6 +346,24 @@ async function startServer() {
 
     const userDoc = getDocSql("users", userId);
     if (!userDoc) {
+      // Auto-provision Demo Accounts
+      if (["demo.owner@cravecraft.app", "manager@cravecraft.app", "waiter@cravecraft.app", "cook@cravecraft.app"].includes(cleanEmail)) {
+        const role = cleanEmail === "demo.owner@cravecraft.app" ? "owner" : cleanEmail.split("@")[0];
+        const newUserData = {
+          email: cleanEmail,
+          role,
+          outletId: "demo-outlet-id",
+          isPaid: true,
+          hasCompletedOnboarding: true,
+          passwordHash: hash,
+          displayName: role.charAt(0).toUpperCase() + role.slice(1) + " Demo",
+          createdAt: Date.now()
+        };
+        setDocSql("users", userId, newUserData);
+        const token = generateJWT({ uid: userId, email: cleanEmail, role, outletId: "demo-outlet-id" });
+        return res.json({ token, user: { uid: userId, email: cleanEmail, displayName: newUserData.displayName } });
+      }
+
       // Check if employee is invited in database
       const employees = getCollectionSql("employees");
       const empEntry = Object.entries(employees).find(([_, emp]: any) => emp.email?.toLowerCase() === cleanEmail);
