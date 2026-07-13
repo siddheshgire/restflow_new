@@ -219,6 +219,10 @@ function isWriteAuthorized(
     return userRole === "manager";
   }
 
+  if (colName === "attendance") {
+    return true; // Allow clock-in/out
+  }
+
   return false;
 }
 
