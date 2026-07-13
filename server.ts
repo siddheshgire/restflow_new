@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import Razorpay from "razorpay";
@@ -275,6 +276,13 @@ const notifyClientsOfOutlet = (outletId: string) => {
 
 async function startServer() {
   const app = express();
+  
+  // Allow requests from Vercel
+  app.use(cors({
+    origin: ["http://localhost:5173", "https://your-cravecraft-app.vercel.app"],
+    credentials: true
+  }));
+
   const PORT = 3000;
 
   app.use(express.json());
