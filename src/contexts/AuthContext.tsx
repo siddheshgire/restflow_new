@@ -100,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (storedOutletId && isValidStored) {
               setSelectedOutletIdState(storedOutletId);
             } else {
-              setSelectedOutletIdState(""); // Leave empty to force selection screen
+              // Auto-select first outlet — no branch selector screen needed
+              const firstOutlet = fetchedOutlets[0];
+              localStorage.setItem("selectedOutletId", firstOutlet.id);
+              setSelectedOutletIdState(firstOutlet.id);
             }
           } else {
             setSelectedOutletIdState("");

@@ -33,10 +33,6 @@ function ProtectedRoute({ children, requireRole, skipOnboardingCheck = false, sk
     if (!skipOnboardingCheck && !hasCompletedOnboarding) {
       return <Navigate to="/onboarding" replace />;
     }
-    // If onboarding is complete, but no branch is selected, force selection
-    if (!skipBranchCheck && hasCompletedOnboarding && !selectedOutletId && outlets.length > 0) {
-      return <Navigate to="/select-branch" replace />;
-    }
   }
 
   if (requireRole && role && !requireRole.includes(role)) {

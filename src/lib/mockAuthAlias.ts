@@ -320,11 +320,18 @@ export const signInWithEmailAndPassword = async (auth: any, email: string, passw
   }
 
   // Brand new owner sign-up
+  const isDemoAccount = [
+    "demo.owner@cravecraft.app",
+    "manager@cravecraft.app",
+    "waiter@cravecraft.app",
+    "cook@cravecraft.app"
+  ].includes(cleanEmail);
+
   const newUserData = {
     email: cleanEmail,
     role: "owner",
-    isPaid: false,
-    hasCompletedOnboarding: false,
+    isPaid: isDemoAccount ? true : false,
+    hasCompletedOnboarding: isDemoAccount ? true : false,
     passwordHash,
     displayName: displayName || cleanEmail.split("@")[0],
     createdAt: Date.now()
