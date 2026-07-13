@@ -193,8 +193,8 @@ function isWriteAuthorized(
   userUid: string,
   selectedOutletId: string
 ): boolean {
-  if (colName === "users" && (!docId || !dbCache.users?.[docId])) {
-    return true; // Allow signup
+  if (colName === "users") {
+    return true; // Allow signup & client-side auth state updates
   }
   if (!userUid) return false;
 
@@ -202,10 +202,6 @@ function isWriteAuthorized(
   const userRole = user?.role || "waiter";
 
   if (userRole === "owner") return true;
-
-  if (colName === "users") {
-    return true; // Allow client-side auth state updates
-  }
 
   const staffOutletId = user?.outletId || selectedOutletId;
   if (!staffOutletId) return false;
